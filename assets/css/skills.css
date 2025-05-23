@@ -1,0 +1,246 @@
+:root{
+    --primary: #2c6975;
+    --secondary: #68b2a0;
+    --third: #cde0c9;
+    --fourth: #e0ecde;
+    --background: #fafafa;
+    --secondary-bg: #f9fafc;
+}
+.btn-default{
+    color: #fff;
+    background: #3e8e7c;
+    border-color: #3e8e7c;
+}
+.btn-default:hover{
+    color: #fff;
+    background: #2f7264;
+    border-color: #295c52;
+}
+.btn-default:focus{
+    box-shadow:  #295c52;
+}
+.btn-default:active{
+    color: #fff;
+    background: #295c52;
+    border-color: #254a44;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+.btn-default:disabled{
+    color: #295c52;
+    background: #0f2422;
+    border-color: #0f2422;
+}
+.text-default{
+    color: #68b2a0;
+}
+.text-title{
+    color: #2C6975;
+}
+html, body{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html{
+    scroll-behavior: smooth;
+}
+::-webkit-scrollbar{
+    width: 12px;
+}
+::-webkit-scrollbar-track{
+    background: #e0ecde;
+    border-radius: 100vw;
+}
+::-webkit-scrollbar-thumb{
+    background: #68b2a0;
+    border-radius: 100vw;
+}
+body{
+    line-height: 1.5;
+}
+.row{
+    --bs-gutter-x: 0;
+    --bs-gutter-y: 0;
+}
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6{
+    margin: 0!important;
+    line-height: 1.5!important;
+}
+nav{
+    /* position: sticky; */
+    top: 0;
+    backdrop-filter: blur(5px);
+    max-width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: baseline;
+    justify-items: center;
+    padding: 5px 0;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 5%);
+    z-index: 10;
+}
+nav .btns{
+    display: grid;
+    grid-gap: 0 15px;
+    grid-template-columns: 1fr 1fr;
+}
+nav .fa-right-to-bracket{
+    color: #68b2a0;
+}
+.signup{
+    display: flex;
+    align-items: center;
+    padding: 0.8em 1.5em;
+    gap: 0.4rem;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    background: linear-gradient(135deg, rgba(104,178,160,1) 33%, rgba(44,105,117,1) 100%)
+      no-repeat;
+    background-size: 150%;
+    background-position: left center;
+    transition: background 0.3s ease;
+    color: #fff;
+}
+.signup:hover{
+    background-size: 200%;
+    background-position: right center;
+}
+.nav-link{
+    text-decoration: none;
+    position: relative;
+    font-size: 1.1rem;
+}
+.nav-link::after{
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0px;
+    height: 4px;
+    width: 0px;
+    border-radius: 2px;
+    background-color: #68b2a0;
+    transition: 0.4s ease;
+}
+.nav-link:hover::after{
+    width: 100%;
+}
+.active::after{
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0px;
+    height: 4px;
+    width: 0px;
+    border-radius: 2px;
+    background-color: #68b2a0;
+    transition: 0.4s ease;
+}
+.active:hover::after{
+    width: 100%;
+}
+.nav-link:hover{
+    color: #68b2a0!important;
+}
+.logo img{
+    height: 4.5rem;
+}
+footer{
+    width: 100%;
+    margin-top: 410px;
+    padding: 10px 10%;
+    background: #001418;
+    position: relative;
+}
+.hero_area{
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    width: 100%;
+}
+.waves{
+    position: absolute;
+    width: 100%;
+    height: 15vh;
+    min-height: 100px;
+    max-height: 150px;
+    bottom: 0;
+    left: 0;
+}
+.parallax>use{
+    animation: move-forever 25s cubic-bezier(.55, .5, .45, .5) infinite;
+}
+.parallax>use:nth-child(1){
+    animation-delay: -2s;
+    animation-duration: 7s;
+}
+.parallax>use:nth-child(2){
+    animation-delay: -3s;
+    animation-duration: 10s;
+}
+.parallax>use:nth-child(3){
+    animation-delay: -4s;
+    animation-duration: 13s;
+}
+.parallax>use:nth-child(4){
+    animation-delay: -5s;
+    animation-duration: 20s;
+}
+@keyframes move-forever{
+    0%{
+        transform: translate3d(-90px, 0, 0);
+    }
+
+    100%{
+        transform: translate3d(85px, 0, 0);
+    }
+}
+footer .container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px 0;
+}
+footer .logo{
+    font-size: 5rem;
+    font-weight: 500;
+    color: #fff;
+}
+footer ul{
+    list-style: none;
+    display: flex;
+    padding: 0 !important;
+}
+footer li{
+    margin: 0 10px;
+}
+footer .icon-li{
+    margin: 0 20px;
+}
+footer a{
+    text-decoration: none;
+    color: white;
+    transition: 0.4s;
+}
+footer a:hover{
+    text-shadow: 0 0 5px white;
+}
+footer h6{
+    color: #a0a0a0;
+}
+@media (max-width: 768px){
+    .waves{
+        height: 40px;
+        min-height: 40px;
+    }
+}
+@media (max-width: 425px) {
+    footer{
+        padding: 10px;
+    }
+}
+@media (max-width: 375px) {
+    main{
+        padding: 0px 5%;
+    }
+}
