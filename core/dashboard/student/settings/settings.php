@@ -46,7 +46,7 @@ require '../auth.php';
                 </a>
             </li>
             <li>
-                <a href="../notifications/student_notifications.php">
+                <a href="../notifications/notifications.php">
                     <div class="icon">
                         <i class="fa-solid fa-bell"></i>
                     </div>
@@ -62,7 +62,7 @@ require '../auth.php';
                 </a>
             </li>
             <li>
-                <a href="../lessons/student_videos.php">
+                <a href="../lessons/videos.php">
                     <div class="icon">
                         <i class="fa-solid fa-circle-play"></i>
                     </div>

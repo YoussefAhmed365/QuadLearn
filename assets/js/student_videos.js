@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     
         // إرسال الطلب إلى الواجهة الخلفية
-        fetch("load_student_videos.php", {
+        fetch("load_videos.php", {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",

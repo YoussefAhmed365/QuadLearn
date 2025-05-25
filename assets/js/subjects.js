@@ -2,7 +2,7 @@ const filesContainer = document.getElementById("filesContainer");
 
 function showFiles(limit) {
     return new Promise((resolve, reject) => {
-        fetch("show-files-student.php", {
+        fetch("show-files.php", {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",

@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
             if (postIdToDelete) {
-                sendAjaxRequest('student_delete_post.php', 'POST', { post_id: postIdToDelete }, handleDeleteResponse);
+                sendAjaxRequest('delete_post.php', 'POST', { post_id: postIdToDelete }, handleDeleteResponse);
                 const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
                 deleteModal.hide();
             }
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     uploaded_files: [] // Add logic if needed to handle file uploads
                 };
 
-                sendAjaxRequest('student_edit_post.php', 'POST', updatedData, handleEditResponse);
+                sendAjaxRequest('edit_post.php', 'POST', updatedData, handleEditResponse);
                 const editModal = bootstrap.Modal.getInstance(document.getElementById('editPostModal'));
                 editModal.hide();
             }
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const isBookmarked = button.classList.contains('bookmarked');
 
             // إرسال طلب AJAX لحفظ أو إزالة المنشور من المفضلة
-            fetch('student_save_post.php', {
+            fetch('save_post.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -285,7 +285,7 @@ function loadPosts(filterType) {
     const postContainer = document.getElementById('postContainer');
     postContainer.innerHTML = ''; // إفراغ المحتويات السابقة
 
-    fetch('student_load_posts.php', {
+    fetch('load_posts.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('content', content);
 
         // تنفيذ طلب AJAX
-        fetch('student_edit_post.php', {
+        fetch('edit_post.php', {
             method: 'POST',
             body: formData
         })

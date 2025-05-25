@@ -25,7 +25,7 @@ async function sendFetchRequest(url, method, body = null) {
 
 // تعيين الإشعار كمقروء
 function markNotificationAsRead(notificationId) {
-    sendFetchRequest('student_mark_notification_as_read.php', 'POST', { notificationId })
+    sendFetchRequest('mark_notification_as_read.php', 'POST', { notificationId })
         .then(data => {
             if (data.success) {
                 loadNotifications();
@@ -41,7 +41,7 @@ function loadNotifications(filterType = 'عرض الكل') {
     const notificationContainer = document.getElementById('notificationContainer');
     notificationContainer.innerHTML = "";
 
-    fetch('student_load_notifications.php', {
+    fetch('load_notifications.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `filterType=${encodeURIComponent(filterType)}`
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function() {
             .map(checkbox => checkbox.closest('tr').getAttribute('data-id'));
 
         if (selectedNotifications.length > 0) {
-            sendFetchRequest('student_delete_notifications.php', 'POST', { notificationIds: selectedNotifications })
+            sendFetchRequest('delete_notifications.php', 'POST', { notificationIds: selectedNotifications })
                 .then(data => {
                     if (data.success) {
                         loadNotifications(filterType);

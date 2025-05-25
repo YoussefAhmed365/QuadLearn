@@ -73,7 +73,7 @@ require '../auth.php';
                     </a>
                 </li>
                 <li>
-                    <a href="../notifications/student_notifications.php">
+                    <a href="../notifications/notifications.php">
                         <div class="icon">
                             <i class="fa-solid fa-bell"></i>
                         </div>
@@ -157,13 +157,13 @@ require '../auth.php';
                                                     <a class="nav-link" aria-current="page" href="../main/dashboard.php">الرئيسية</a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link" href="../notifications/student_notifications.php">الإشعارات</a>
+                                                    <a class="nav-link" href="../notifications/notifications.php">الإشعارات</a>
                                                 </li>
                                                 <li class="nav-item">
                                                     <a class="nav-link" href="../files/subjects.php">المحتوى الدراسي</a>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <a class="nav-link" href="../lessons/student_videos.php">الدروس</a>
+                                                    <a class="nav-link" href="../lessons/videos.php">الدروس</a>
                                                 </li>
                                                 <li class="nav-item">
                                                     <a class="nav-link active" href="community.php">المجتمع</a>
@@ -244,7 +244,7 @@ require '../auth.php';
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body px-5 pt-2">
-                                        <form id="add-post-form" action="student_add_post.php" method="POST" enctype="multipart/form-data">
+                                        <form id="add-post-form" action="add_post.php" method="POST" enctype="multipart/form-data">
                                             <div class="row g-3 pb-5">
                                                 <div class="col-12">
                                                     <label for="subject" class="form-label">المادة الدراسية</label>
