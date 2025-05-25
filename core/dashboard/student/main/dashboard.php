@@ -448,7 +448,7 @@ $videoCount = $rowVideos['videoCount'];
     <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
     <script src="https://kit.fontawesome.com/35b8a1f8f5.js" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="../../../../assets/js/sdash.js"></script>
+    <script src="../../../../assets/js/dashboard.js"></script>
     <script src="../../../../assets/js/handle_student_notification_panel.js"></script>
 </body>
 </html>
