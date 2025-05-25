@@ -1,5 +1,5 @@
 <?php
-// MUST be the very first thing before ANY output (even whitespace)
+// MUST be the very first thing before ANY output (even whitespace).
 session_start();
 
 require 'core/db_connect.php'; // Ensure this path is correct and $conn is established
