@@ -1,5 +1,3 @@
-const socket = new WebSocket('ws://127.0.0.1:5500');
-
 var app = angular.module('demoApp', ['ngAnimate']);
 app.controller('demoController', function ($scope) {
 	var opendd;
