@@ -39,7 +39,7 @@ require '../auth.php';
                             <h5 class="modal-title" id="editPostModalLabel">تعديل المنشور</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form action="update_post.php" method="POST">
+                        <form action="edit_post.php" method="POST">
                             <div class="modal-body">
                                 <div class="mb-3">
                                     <label for="editPostTitle" class="form-label">العنوان</label>
@@ -249,7 +249,7 @@ require '../auth.php';
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body px-5 pt-2">
-                                            <form id="postForm" action="add_post.php" method="POST" enctype="multipart/form-data">
+                                            <form id="addpostForm" action="add_post.php" method="POST" enctype="multipart/form-data">
                                                 <div class="row g-3 pb-5">
                                                     <div class="col-12">
                                                         <label for="title" class="form-label">العنوان</label>
@@ -323,6 +323,8 @@ require '../auth.php';
                                             $word = ["doc", "docx"];
                                             $excel = ["csv", "xlsx"];
                                             $video = ["mp4", "avi", "mov", "mkv", "webm"];
+                                            // NOTE: Need to create MySQL statemnt for a teacher instead of student to get his files posted by him and his assistants
+                                            // NOTE: Handle case if signed user is assistant
                                             $stmt = $conn->prepare("SELECT DISTINCT c.uploaded_files, c.original_file_names, u.first_name, u.last_name, u.account_type
                                                                     FROM community c
                                                                     JOIN users u ON c.user_id = u.id
@@ -423,7 +425,7 @@ require '../auth.php';
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
         <script src="https://kit.fontawesome.com/35b8a1f8f5.js" crossorigin="anonymous"></script>
-        <script src="../../../../assets/js/tcommunity.js"></script>
         <script src="../../../../assets/js/handle_teacher_notification_panel.js"></script>
+        <script src="../../../../assets/js/tcommunity.js"></script>
     </body>
 </html>

@@ -39,7 +39,7 @@ require '../auth.php';
                             <h5 class="modal-title" id="editPostModalLabel">تعديل المنشور</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form action="update_post.php" method="POST">
+                        <form action="edit_post.php" method="POST">
                             <div class="modal-body">
                                 <div class="mb-3">
                                     <label for="editPostTitle" class="form-label">العنوان</label>
@@ -224,12 +224,6 @@ require '../auth.php';
                             </div>
                         </nav>
                     </header>
-                    <div class="modal fade" id="editPostModal">
-                        <form id="editPostForm">
-                            <input id="editTitle" name="title" type="text" class="form-control">
-                            <textarea id="editContent" name="content" class="form-control"></textarea>
-                        </form>
-                    </div>
                     <div class="row flex-column-reverse flex-sm-row g-3">
                         <div class="col-md-9">
                             <div class="add-post rounded-3 bg-white shadow-sm p-3 mb-4 d-flex justify-content-between align-items-center">
@@ -244,7 +238,7 @@ require '../auth.php';
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body px-5 pt-2">
-                                            <form id="addPostForm" method="POST" enctype="multipart/form-data">
+                                            <form id="addPostForm" action="add_post.php" method="POST" enctype="multipart/form-data">
                                                 <div class="row g-3 pb-5">
                                                     <div class="col-12">
                                                         <label for="subject" class="form-label">المادة الدراسية</label>
@@ -320,6 +314,7 @@ require '../auth.php';
                                 <span class="input-group-text" id="addon-wrapping"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
                                 <input type="search" id="searchInput" class="form-control" placeholder="بحث" aria-describedby="addon-wrapping">
                             </div>
+                            <div id="liveAlertPlaceholder"></div>
                             <div class="post-container" id="postContainer"></div>
                         </div>
                         <div class="col-md-3 shadow-sm rounded-3 bg-white h-100 pb-3">
@@ -421,7 +416,7 @@ require '../auth.php';
                                                 $stmt->close();
                                                 ?>
 
-                                                <!-- المودال -->
+                                                <!-- Subject Posts -->
                                                 <div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
                                                     <div class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog-centered modal-dialog-scrollable">
                                                         <div class="modal-content">
@@ -429,12 +424,12 @@ require '../auth.php';
                                                                 <h1 class="modal-title fs-5" id="subjectModalLabel">منشورات المادة</h1>
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
-                                                            <div class="modal-body" id="modal-content">
-                                                                <!-- سيتم إضافة المحتوى هنا -->
-                                                            </div>
+                                                            <div class="modal-body" id="modal-content"></div>
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                <!-- Add Teacher -->
                                                 <a href="../instructors/show-teachers.php" class="add-teacher row d-flex align-items-center btn btn-default rounded-4 shadow mt-4">
                                                     <div class="col-3 rounded-4 bg-light d-flex justify-content-center align-items-center h-75">
                                                         <i class="fa-solid fa-user-plus text-secondary fs-5" aria-hidden="true"></i>

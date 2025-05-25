@@ -191,7 +191,8 @@ if ($result->num_rows > 0) {
                             <a href="../../../../assets/files/<?php echo htmlspecialchars($file); ?>"
                                 class="fileName d-flex justify-content-center align-items-center text-decoration-none text-black"
                                 download>
-                                <i class="fa-solid fa-file-pdf me-1 fs-5"></i><?php echo htmlspecialchars($original_file_names[$index]); ?>
+                                <i
+                                    class="fa-solid fa-file-pdf me-1 fs-5"></i><?php echo htmlspecialchars($original_file_names[$index]); ?>
                             </a>
                         </div>
                     <?php } ?>
@@ -202,11 +203,13 @@ if ($result->num_rows > 0) {
                     <?php
                     if ($publisher_id === $user_id) {
                         ?>
+                        <!-- Button لتعديل المنشور -->
                         <button class="btn color-secondary edit-post-btn" data-id="<?php echo $postId; ?>"
                             data-title="<?php echo $title; ?>" data-content="<?php echo $content; ?>" data-bs-toggle="modal"
                             data-bs-target="#editPostModal">
                             <i class="fa-solid fa-pen"></i>
                         </button>
+                        <!-- Button لحذف المنشور -->
                         <button class="btn color-secondary delete-post-btn" data-delete-post="<?php echo $postId; ?>"
                             data-bs-toggle="modal" data-bs-target="#deletePostModal<?php echo $postId; ?>">
                             <i class="fa-solid fa-trash"></i>
@@ -214,15 +217,16 @@ if ($result->num_rows > 0) {
                         <?php
                     }
                     ?>
-                    <div class="modal fade" id="deletePostModal<?php echo $postId; ?>" tabindex="-1"
-                        aria-labelledby="deletePostModalLabel" role="dialog">
+                    <!-- Delete Post Modal -->
+                    <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel"
+                        role="dialog">
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="deletePostModalLabel">حذف المنشور</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <form action="delete_post.php" method="POST">
+                                <form method="POST" id="deletePostForm">
                                     <div class="modal-body">
                                         هل أنت متأكد من رغبتك في حذف هذا المنشور؟
                                         <input type="hidden" name="post_id" id="deletePostId" value="<?php echo $postId; ?>">
@@ -230,7 +234,7 @@ if ($result->num_rows > 0) {
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
                                         <button type="submit" class="btn btn-danger confirm-delete-post"
-                                            data-post-id="<?php echo $postId; ?>">حذف</button>
+                                            data-post-id="<?php echo $postId; ?>" data-bs-dismiss="modal">حذف</button>
                                     </div>
                                 </form>
                             </div>

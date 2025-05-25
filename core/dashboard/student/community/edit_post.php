@@ -6,7 +6,7 @@ $postId = $_POST['post_id'] ?? null;
 $title = $_POST['title'] ?? '';
 $content = $_POST['content'] ?? '';
 
-if ($postId && $title && $content) {
+if ($postId) {
     // تحضير استعلام التحديث
     $query = "UPDATE community SET title = ?, content = ?, updated_at = NOW() WHERE id = ? AND user_id = ?";
     $stmt = $conn->prepare($query);

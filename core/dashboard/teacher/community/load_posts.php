@@ -83,11 +83,14 @@ if ($result->num_rows > 0) {
         $publisher_id = $row['publisher_id'];
         $isBookmarked = (bool) $row['is_bookmarked'];
         ?>
-        <div class="post container bg-white shadow-sm rounded-4 py-4 px-5 mb-4" data-id="<?php echo $postId; ?>" data-title="<?php echo $title; ?>" data-content="<?php echo $content; ?>" data-badges="<?php echo htmlspecialchars(json_encode($badges)); ?>" data-uploaded-files="<?php echo htmlspecialchars(json_encode($original_file_names)); ?>">
+        <div class="post container bg-white shadow-sm rounded-4 py-4 px-5 mb-4" data-id="<?php echo $postId; ?>"
+            data-title="<?php echo $title; ?>" data-content="<?php echo $content; ?>"
+            data-badges="<?php echo htmlspecialchars(json_encode($badges)); ?>"
+            data-uploaded-files="<?php echo htmlspecialchars(json_encode($original_file_names)); ?>">
             <div class="title">
                 <?php
-                    $target_dir = "../../../../assets/images/profiles/";
-                    $dir = (glob("$target_dir$publisher_id.*")) ? "$target_dir$publisher_id.webp" : "{$target_dir}default.png";
+                $target_dir = "../../../../assets/images/profiles/";
+                $dir = (glob("$target_dir$publisher_id.*")) ? "$target_dir$publisher_id.webp" : "{$target_dir}default.png";
                 ?>
                 <h2><?php echo $title; ?></h2>
             </div>
@@ -95,7 +98,8 @@ if ($result->num_rows > 0) {
                 <div class="col-sm contact  d-flex align-items-center justify-content-start">
                     <div class="photo position-relative">
                         <img class="rounded-4" src="<?php echo $dir; ?>" alt="profile">
-                        <div class="subject d-flex justify-content-center align-items-center position-absolute rounded-4 border border-4 border-white">
+                        <div
+                            class="subject d-flex justify-content-center align-items-center position-absolute rounded-4 border border-4 border-white">
                             <?php
                             switch ($accountType) {
                                 case 'teacher':
@@ -115,10 +119,10 @@ if ($result->num_rows > 0) {
                 </div>
                 <?php if (!empty($badges) && is_array($badges)) { ?>
                     <div class="col-sm badges row overflow-x-scroll flex-nowrap pb-1 d-flex align-items-center justify-content-end">
-                        <?php foreach ($badges as $badge) { 
+                        <?php foreach ($badges as $badge) {
                             $badgeName = isset($badge['name']['name']) ? htmlspecialchars($badge['name']['name']) : "اسم غير متوفر";
                             $badgeColor = isset($badge['name']['color']) ? htmlspecialchars($badge['name']['color']) : "badge-default";
-                        ?>
+                            ?>
                             <div class="text-truncate col-auto ms-2 px-3 py-0 badge-<?php echo $badgeColor; ?>">
                                 <?php echo $badgeName; ?>
                             </div>
@@ -131,8 +135,11 @@ if ($result->num_rows > 0) {
                 <div class="files table-responsive d-flex justify-content-start align-items-center gap-2 mb-3 pb-1">
                     <?php foreach ($uploaded_files as $index => $file) { ?>
                         <div class="file bg-white shadow-sm rounded-pill px-2 py-1">
-                            <a href="../../../../assets/files/<?php echo htmlspecialchars($file); ?>" class="fileName d-flex justify-content-center align-items-center text-decoration-none text-black" download>
-                                <i class="fa-solid fa-file-pdf me-1 fs-5"></i><?php echo htmlspecialchars($original_file_names[$index]); ?>
+                            <a href="../../../../assets/files/<?php echo htmlspecialchars($file); ?>"
+                                class="fileName d-flex justify-content-center align-items-center text-decoration-none text-black"
+                                download>
+                                <i
+                                    class="fa-solid fa-file-pdf me-1 fs-5"></i><?php echo htmlspecialchars($original_file_names[$index]); ?>
                             </a>
                         </div>
                     <?php } ?>
@@ -141,15 +148,19 @@ if ($result->num_rows > 0) {
             <div class="post-footer d-flex justify-content-between align-items-center">
                 <div class="d-flex gap-2">
                     <!-- Button لتعديل المنشور -->
-                    <button class="btn color-secondary edit-post-btn" data-id="<?php echo $postId; ?>" data-title="<?php echo $title; ?>" data-content="<?php echo $content; ?>" data-bs-toggle="modal" data-bs-target="#editPostModal">
+                    <button class="btn color-secondary edit-post-btn" data-id="<?php echo $postId; ?>"
+                        data-title="<?php echo $title; ?>" data-content="<?php echo $content; ?>" data-bs-toggle="modal"
+                        data-bs-target="#editPostModal">
                         <i class="fa-solid fa-pen"></i>
                     </button>
                     <!-- Button لحذف المنشور -->
-                    <button class="btn color-secondary delete-post-btn" data-delete-post="<?php echo $postId; ?>" data-bs-toggle="modal" data-bs-target="#deletePostModal">
+                    <button class="btn color-secondary delete-post-btn" data-delete-post="<?php echo $postId; ?>"
+                        data-bs-toggle="modal" data-bs-target="#deletePostModal">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                     <!-- Delete Post Modal -->
-                    <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel" role="dialog">
+                    <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel"
+                        role="dialog">
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -163,14 +174,16 @@ if ($result->num_rows > 0) {
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                                        <button type="submit" class="btn btn-danger confirm-delete-post" data-post-id="<?php echo $postId; ?>" data-bs-dismiss="modal">حذف</button>
+                                        <button type="submit" class="btn btn-danger confirm-delete-post"
+                                            data-post-id="<?php echo $postId; ?>" data-bs-dismiss="modal">حذف</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
                     <!-- إضافة أو إزالة المنشور من المفضلة -->
-                    <button class="btn color-secondary bookmark-post-btn <?php echo $isBookmarked ? 'bookmarked' : ''; ?>" data-post-id="<?php echo $postId; ?>"> 
+                    <button class="btn color-secondary bookmark-post-btn <?php echo $isBookmarked ? 'bookmarked' : ''; ?>"
+                        data-post-id="<?php echo $postId; ?>">
                         <i class="fa-solid fa-bookmark <?php echo $isBookmarked ? 'text-warning' : ''; ?>"></i>
                     </button>
                 </div>
@@ -180,7 +193,7 @@ if ($result->num_rows > 0) {
     }
 } else {
     $message = "";
-     switch ($filterType) {
+    switch ($filterType) {
         case 'الرئيسية':
             $message = "لا توجد منشورات حتى الآن";
             break;
@@ -196,7 +209,7 @@ if ($result->num_rows > 0) {
         default:
             # code...
             break;
-     }
+    }
     ?>
     <div class="pt-5">
         <h3 class="text-center text-secondary"><?php echo $message; ?></h3>

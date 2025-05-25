@@ -57,7 +57,7 @@ function updateBadgeClass(badgeInput, color) {
 
 document.addEventListener("DOMContentLoaded", function () {
     // Handle form submission with loading indicator and validation
-    const form = document.getElementById('postForm');
+    const form = document.getElementById('addpostForm');
     form.addEventListener('submit', function (e) {
         const loadingSpinner = document.getElementById('loadingSpinner');
         const badgeInputs = document.querySelectorAll('input[name^="badges"]');
@@ -76,27 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
             loadingSpinner.classList.remove('d-none');
         }
     });
-});
 
-document.getElementById('searchInput').addEventListener('keyup', function () {
-    const searchValue = this.value.toLowerCase();
-    const posts = document.querySelectorAll('.post');
-
-    posts.forEach(post => {
-        const title = post.getAttribute('data-title').toLowerCase();
-        const content = post.getAttribute('data-content').toLowerCase();
-        const badges = JSON.parse(post.getAttribute('data-badges')).map(b => b.name).join(' ').toLowerCase(); // تعديل حسب هيكل الشارات
-        const uploadedFiles = JSON.parse(post.getAttribute('data-uploaded-files')).join(' ').toLowerCase();
-
-        if (title.includes(searchValue) || content.includes(searchValue) || badges.includes(searchValue) || uploadedFiles.includes(searchValue)) {
-            post.style.display = 'block'; // إظهار المنشور
-        } else {
-            post.style.display = 'none'; // إخفاء المنشور
-        }
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function () {
     // تحميل المنشورات الافتراضية عند تحميل الصفحة
     loadPosts('الرئيسية');
 
@@ -142,55 +122,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         }
     });
-});
-
-// دالة تحميل المنشورات بناءً على نوع الفلتر
-function loadPosts(filterType) {
-    const postContainer = document.getElementById('postContainer');
-    postContainer.innerHTML = ''; // Clear previous content
-
-    // Use an absolute path for the fetch request
-    fetch('/website2/core/dashboard/teacher/community/load_posts.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: `filterType=${encodeURIComponent(filterType)}`
-    })
-        .then(response => response.text())
-        .then(data => {
-            postContainer.innerHTML = data;
-        })
-        .catch(error => {
-            console.error('Error loading posts:', error);
-            commonModal.show();
-            showModal('error', 'حدث خطأ أثناء تحميل المنشورات يرجى المحاولة لاحقاً.');
-            setTimeout(() => {
-                commonModal.hide();
-                messageDiv.innerHTML = ''; // Clear the message after a delay
-            }, 2000);
-        });
-}
-
-document.querySelectorAll('.listItem button').forEach(button => {
-    button.addEventListener('click', function () {
-        // إزالة class active من جميع الأزرار
-        document.querySelectorAll('.listItem').forEach(item => {
-            item.classList.remove('active');
-        });
-
-        // إضافة class active للزر الذي تم الضغط عليه
-        this.closest('.listItem').classList.add('active');
-
-        // جلب نوع الفلتر بناءً على النص
-        let filterType = this.querySelector('span').textContent;
-
-        // إرسال طلب AJAX بناءً على الفلتر المختار
-        loadPosts(filterType);
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function () {
 
     // --- References to common elements ---
     const editPostModalElement = document.getElementById('editPostModal');
@@ -324,5 +255,69 @@ document.addEventListener('DOMContentLoaded', function () {
                     }, 2000);
                 });
         }
+    });
+});
+
+document.getElementById('searchInput').addEventListener('keyup', function () {
+    const searchValue = this.value.toLowerCase();
+    const posts = document.querySelectorAll('.post');
+
+    posts.forEach(post => {
+        const title = post.getAttribute('data-title').toLowerCase();
+        const content = post.getAttribute('data-content').toLowerCase();
+        const badges = JSON.parse(post.getAttribute('data-badges')).map(b => b.name).join(' ').toLowerCase(); // تعديل حسب هيكل الشارات
+        const uploadedFiles = JSON.parse(post.getAttribute('data-uploaded-files')).join(' ').toLowerCase();
+
+        if (title.includes(searchValue) || content.includes(searchValue) || badges.includes(searchValue) || uploadedFiles.includes(searchValue)) {
+            post.style.display = 'block'; // إظهار المنشور
+        } else {
+            post.style.display = 'none'; // إخفاء المنشور
+        }
+    });
+});
+
+// دالة تحميل المنشورات بناءً على نوع الفلتر
+function loadPosts(filterType) {
+    const postContainer = document.getElementById('postContainer');
+    postContainer.innerHTML = ''; // Clear previous content
+
+    // Use an absolute path for the fetch request
+    fetch('../../teacher/community/load_posts.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `filterType=${encodeURIComponent(filterType)}`
+    })
+        .then(response => response.text())
+        .then(data => {
+            postContainer.innerHTML = data;
+        })
+        .catch(error => {
+            console.error('Error loading posts:', error);
+            commonModal.show();
+            showModal('error', 'حدث خطأ أثناء تحميل المنشورات يرجى المحاولة لاحقاً.');
+            setTimeout(() => {
+                commonModal.hide();
+                messageDiv.innerHTML = ''; // Clear the message after a delay
+            }, 2000);
+        });
+}
+
+document.querySelectorAll('.listItem button').forEach(button => {
+    button.addEventListener('click', function () {
+        // إزالة class active من جميع الأزرار
+        document.querySelectorAll('.listItem').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // إضافة class active للزر الذي تم الضغط عليه
+        this.closest('.listItem').classList.add('active');
+
+        // جلب نوع الفلتر بناءً على النص
+        let filterType = this.querySelector('span').textContent;
+
+        // إرسال طلب AJAX بناءً على الفلتر المختار
+        loadPosts(filterType);
     });
 });

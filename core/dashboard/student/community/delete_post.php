@@ -1,20 +1,35 @@
 <?php
-require '../auth.php';
+require '../auth.php'; // تأكد من أن التوثيق موجود
+header('Content-Type: application/json; charset=UTF-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postId = $_POST['post_id'];
 
-    $stmt = $conn->prepare("DELETE FROM community WHERE id = ?");
-    $stmt->bind_param('i', $postId);
+    if (empty($postId)) {
+        // إذا كانت البيانات غير مكتملة
+        echo json_encode(['state' => "warning", 'message' => 'البيانات غير مكتملة']);
+        exit;
+    }
 
+    // تحضير استعلام التحديث
+    $query = "DELETE FROM community WHERE id = ?";
+    $stmt = $conn->prepare($query);
+
+    // ربط المعاملات
+    $stmt->bind_param("i", $postId);
+
+    // تنفيذ الاستعلام
     if ($stmt->execute()) {
-        header("Location: community.php");
+        // إرسال استجابة JSON بنجاح
+        echo json_encode(['state' => 'success', 'message' => 'تم حذف المنشور بنجاح']);
     } else {
-        echo '<script>
-                alert("حدثت مشكلة أثناء حذف المنشور");
-            </script>';
+        // إرسال استجابة JSON بفشل التحديث
+        echo json_encode(['state' => "error", 'message' => 'حدث خطأ أثناء تحديث المنشور']);
     }
 
     $stmt->close();
+} else {
+    // إذا كانت البيانات غير صالحة
+    echo json_encode(['state' => "warning", 'message' => 'البيانات غير صالحة']);
     exit;
 }
