@@ -271,7 +271,7 @@ require '../auth.php';
                         <img src="<?php echo $dir; ?>" alt="Profile Photo" class="rounded-circle col-md-6" style="width: clamp(200px, 200px, 100%);height: max-content;">
                     </div>
 
-                    <form action="update-student-account.php" method="POST" enctype="multipart/form-data">
+                    <form action="update-account.php" method="POST" enctype="multipart/form-data">
                         <!-- Username -->
                         <div class="mb-3">
                             <label class="form-label" for="new_username">اسم المستخدم <b>.</b> خاص</label>

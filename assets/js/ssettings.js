@@ -39,7 +39,7 @@ document.getElementById('uploadForm').addEventListener('submit', function (event
             // إذا كانت جميع التحقق ناجحة، تابع إلى رفع الصورة
             var formData = new FormData(document.getElementById('uploadForm'));
 
-            fetch('student_profile_photo_handler.php', {
+            fetch('profile_photo_handler.php', {
                 method: 'POST',
                 body: formData
             })
