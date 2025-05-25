@@ -122,14 +122,6 @@ function handleCookieConsent() {
     }
 }
 
-
-// --- Bootstrap Popover Initialization ---
-// (Keep your popover init code if you still use it)
-// Example:
-// const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-// const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
-
-
 // --- Main Execution ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM fully loaded and parsed");
