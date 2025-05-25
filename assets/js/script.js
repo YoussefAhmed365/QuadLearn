@@ -12,7 +12,7 @@ function setCookie(name, value, days) {
         expires = "; expires=" + date.toUTCString();
     }
     // Ensure cookie value is properly encoded
-    document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/; Secure; HttpOnly; SameSite=Lax"; // Added SameSite
+    document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/; Secure; SameSite=Lax";
 }
 
 function getCookie(name) {

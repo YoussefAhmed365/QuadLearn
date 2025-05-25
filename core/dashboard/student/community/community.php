@@ -240,11 +240,11 @@ require '../auth.php';
                             <div class="modal-dialog modal-lg modal-fullscreen-md-down modal-dialog-centered modal-dialog-scrollable">
                                 <div class="modal-content">
                                     <div class="modal-header border-0">
-                                        <h1 class="modal-title fs-5" id="exampleModalLabel">ما الجديد اليوم؟</h1>
+                                        <h1 class="modal-title fs-5" id="addPostLabel">ما الجديد اليوم؟</h1>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body px-5 pt-2">
-                                        <form id="add-post-form" action="add_post.php" method="POST" enctype="multipart/form-data">
+                                        <form id="addPostForm" method="POST" enctype="multipart/form-data">
                                             <div class="row g-3 pb-5">
                                                 <div class="col-12">
                                                     <label for="subject" class="form-label">المادة الدراسية</label>
@@ -291,8 +291,8 @@ require '../auth.php';
                                                     <input type="text" id="title" class="form-control" name="title">
                                                 </div>
                                                 <div class="col-12">
-                                                    <label for="content" class="form-label">المحتوى<small class="text-danger">*</small></label>
-                                                    <textarea id="content" class="form-control" name="content" rows="4" required></textarea>
+                                                    <label for="postContent" class="form-label">المحتوى<small class="text-danger">*</small></label>
+                                                    <textarea id="postContent" class="form-control" name="content" rows="4" required></textarea>
                                                 </div>
                                                 <div class="col-5">
                                                     <p>الشارات</p>
@@ -385,7 +385,7 @@ require '../auth.php';
                                                     $last_name = $teacher['last_name'];
                                                     $subject = $teacher['subject'];
                                                     ?>
-                                                    <button class="row btn btn-light d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#exampleModal" data-subject="<?php echo htmlspecialchars($subject); ?>" data-teacher-id="<?php echo $teacher_id; ?>">
+                                                    <button class="row btn btn-light d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#subjectModal" data-subject="<?php echo htmlspecialchars($subject); ?>" data-teacher-id="<?php echo $teacher_id; ?>">
                                                         <div class="col-4 overflow-hidden rounded d-flex justify-content-center align-items-center">
                                                             <img src="../../../../assets/images/<?php echo htmlspecialchars($subject); ?>.webp" alt="subject">
                                                         </div>
@@ -422,11 +422,11 @@ require '../auth.php';
                                             ?>
 
                                             <!-- المودال -->
-                                            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog-centered modal-dialog-scrollable">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h1 class="modal-title fs-5" id="exampleModalLabel">منشورات المادة</h1>
+                                                            <h1 class="modal-title fs-5" id="subjectModalLabel">منشورات المادة</h1>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body" id="modal-content">

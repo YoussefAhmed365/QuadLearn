@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
 
             $random_name = uniqid() . '.' . $file_ext;
-            if (move_uploaded_file($file_tmp, $upload_dir . $random_name)) {
+            if (move_uploaded_file($file_tmp, "$upload_dir$random_name")) {
                 $uploaded_files[] = $random_name;
                 $original_file_names[] = htmlspecialchars($original_name);
             }

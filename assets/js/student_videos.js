@@ -37,7 +37,6 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({
                 filterType: filterType, // التصنيف المحدد
-                level: "Grade 12" // يمكنك تحديث المستوى حسب الحاجة
             }),
         })
         .then(response => {

@@ -57,8 +57,8 @@ function updateBadgeClass(badgeInput, color) {
 
 document.addEventListener("DOMContentLoaded", function () {
     // Handle form submission with loading indicator and validation
-    const form = document.getElementById('add-post-form');
-    form.addEventListener('submit', function (e) {
+    const addPostForm = document.getElementById('addPostForm');
+    addPostForm.addEventListener('submit', function (e) {
         const loadingSpinner = document.getElementById('loadingSpinner');
         const badgeInputs = document.querySelectorAll('input[name^="badges"]');
         let valid = true;
@@ -74,29 +74,19 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
         } else {
             loadingSpinner.classList.remove('d-none');
+            e.preventDefault();
+
+            fetch('add_post.php', {
+                method: 'POST',
+                body: new FormData(addPostForm)
+            })
+            .then(response => response.json())
+            .then(data => {
+                
+            })
         }
     });
-});
 
-document.getElementById('searchInput').addEventListener('keyup', function () {
-    const searchValue = this.value.toLowerCase();
-    const posts = document.querySelectorAll('.post');
-
-    posts.forEach(post => {
-        const title = post.getAttribute('data-title').toLowerCase();
-        const content = post.getAttribute('data-content').toLowerCase();
-        const badges = JSON.parse(post.getAttribute('data-badges')).map(b => b.name).join(' ').toLowerCase(); // تعديل حسب هيكل الشارات
-        const uploadedFiles = JSON.parse(post.getAttribute('data-uploaded-files')).join(' ').toLowerCase();
-
-        if (title.includes(searchValue) || content.includes(searchValue) || badges.includes(searchValue) || uploadedFiles.includes(searchValue)) {
-            post.style.display = 'block'; // إظهار المنشور
-        } else {
-            post.style.display = 'none'; // إخفاء المنشور
-        }
-    });
-});
-
-document.addEventListener('DOMContentLoaded', () => {
     let postIdToDelete = null;
     let postIdToEdit = null;
 
@@ -242,9 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alertDiv.textContent = error.message || 'حدث خطأ أثناء معالجة الطلب.';
         document.body.appendChild(alertDiv);
     }
-});
 
-document.addEventListener('DOMContentLoaded', function () {
     // تحميل المنشورات الافتراضية عند تحميل الصفحة
     loadPosts('الرئيسية');
 
@@ -276,6 +264,102 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(error => {
                     console.error('Error updating bookmark status:', error);
                 });
+        }
+    });
+
+    const subjectModal = document.getElementById('subjectModal');
+
+    subjectModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // الزر الذي تم النقر عليه
+        const subject = button.getAttribute('data-subject'); // الحصول على الموضوع
+        const teacherId = button.getAttribute('data-teacher-id'); // الحصول على معرف المعلم
+
+        // هنا يمكنك إضافة طلب AJAX لجلب المنشورات
+        fetch('get_posts.php?subject=' + encodeURIComponent(subject) + '&teacher_id=' + teacherId)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('modal-content').innerHTML = data; // تحديث محتوى المودال
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    // إضافة Event Listener على زر التعديل
+    document.addEventListener('click', function (event) {
+        const button = event.target.closest('.edit-post-btn');
+        if (button) {
+            // جلب القيم المخزنة في data-attributes
+            const postId = button.getAttribute('data-id');
+            const title = button.getAttribute('data-title');
+            const content = button.getAttribute('data-content');
+
+            // تعبئة الحقول بالقيم المستخرجة من data-attributes
+            document.getElementById('editPostId').value = postId;
+            document.getElementById('editPostTitle').value = title;
+            document.getElementById('editPostContent').value = content;
+
+            // التأكد من أن القيم تم تحميلها بشكل صحيح في الكونسول
+            console.log('Post ID:', postId);
+            console.log('Title:', title);
+            console.log('Content:', content);
+        }
+    });
+
+    // إضافة Event Listener على زر حفظ التعديلات في المودال
+    document.getElementById('editPostModal').addEventListener('submit', function (event) {
+        event.preventDefault(); // منع إرسال النموذج بشكل تقليدي
+
+        // جلب القيم من الحقول
+        const postId = document.getElementById('editPostId').value;
+        const title = document.getElementById('editPostTitle').value;
+        const content = document.getElementById('editPostContent').value;
+
+        // إرسال البيانات عبر AJAX
+        const formData = new FormData();
+        formData.append('post_id', postId);
+        formData.append('title', title);
+        formData.append('content', content);
+
+        // تنفيذ طلب AJAX
+        fetch('edit_post.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // تحديث الصفحة أو إغلاق المودال بناءً على الرد
+                    alert('تم تحديث المنشور بنجاح!');
+                    // يمكنك هنا إعادة تحميل المنشورات أو تحديث المحتوى
+                    loadPosts('الرئيسية');  // هنا نقوم بإعادة تحميل المنشورات بعد التعديل
+
+                    // إغلاق المودال
+                    const modal = new bootstrap.Modal(document.getElementById('editPostModal'));
+                    modal.hide();
+                } else {
+                    alert('فشل تحديث المنشور: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating post:', error);
+                alert('حدث خطأ أثناء تحديث المنشور');
+            });
+    });
+});
+
+document.getElementById('searchInput').addEventListener('keyup', function () {
+    const searchValue = this.value.toLowerCase();
+    const posts = document.querySelectorAll('.post');
+
+    posts.forEach(post => {
+        const title = post.getAttribute('data-title').toLowerCase();
+        const content = post.getAttribute('data-content').toLowerCase();
+        const badges = JSON.parse(post.getAttribute('data-badges')).map(b => b.name).join(' ').toLowerCase(); // تعديل حسب هيكل الشارات
+        const uploadedFiles = JSON.parse(post.getAttribute('data-uploaded-files')).join(' ').toLowerCase();
+
+        if (title.includes(searchValue) || content.includes(searchValue) || badges.includes(searchValue) || uploadedFiles.includes(searchValue)) {
+            post.style.display = 'block'; // إظهار المنشور
+        } else {
+            post.style.display = 'none'; // إخفاء المنشور
         }
     });
 });
@@ -316,89 +400,5 @@ document.querySelectorAll('.listItem button').forEach(button => {
 
         // إرسال طلب AJAX بناءً على الفلتر المختار
         loadPosts(filterType);
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    const exampleModal = document.getElementById('exampleModal');
-
-    exampleModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget; // الزر الذي تم النقر عليه
-        const subject = button.getAttribute('data-subject'); // الحصول على الموضوع
-        const teacherId = button.getAttribute('data-teacher-id'); // الحصول على معرف المعلم
-
-        // هنا يمكنك إضافة طلب AJAX لجلب المنشورات
-        fetch('get_posts.php?subject=' + encodeURIComponent(subject) + '&teacher_id=' + teacherId)
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('modal-content').innerHTML = data; // تحديث محتوى المودال
-            })
-            .catch(error => console.error('Error:', error));
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    // إضافة Event Listener على زر التعديل
-    document.addEventListener('click', function (event) {
-        const button = event.target.closest('.edit-post-btn');
-        if (button) {
-            // جلب القيم المخزنة في data-attributes
-            const postId = button.getAttribute('data-id');
-            const title = button.getAttribute('data-title');
-            const content = button.getAttribute('data-content');
-
-            // تعبئة الحقول بالقيم المستخرجة من data-attributes
-            document.getElementById('editPostId').value = postId;
-            document.getElementById('editPostTitle').value = title;
-            document.getElementById('editPostContent').value = content;
-
-            // التأكد من أن القيم تم تحميلها بشكل صحيح في الكونسول
-            console.log('Post ID:', postId);
-            console.log('Title:', title);
-            console.log('Content:', content);
-        }
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    // إضافة Event Listener على زر حفظ التعديلات في المودال
-    document.getElementById('editPostModal').addEventListener('submit', function (event) {
-        event.preventDefault(); // منع إرسال النموذج بشكل تقليدي
-
-        // جلب القيم من الحقول
-        const postId = document.getElementById('editPostId').value;
-        const title = document.getElementById('editPostTitle').value;
-        const content = document.getElementById('editPostContent').value;
-
-        // إرسال البيانات عبر AJAX
-        const formData = new FormData();
-        formData.append('post_id', postId);
-        formData.append('title', title);
-        formData.append('content', content);
-
-        // تنفيذ طلب AJAX
-        fetch('edit_post.php', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // تحديث الصفحة أو إغلاق المودال بناءً على الرد
-                    alert('تم تحديث المنشور بنجاح!');
-                    // يمكنك هنا إعادة تحميل المنشورات أو تحديث المحتوى
-                    loadPosts('الرئيسية');  // هنا نقوم بإعادة تحميل المنشورات بعد التعديل
-
-                    // إغلاق المودال
-                    const modal = new bootstrap.Modal(document.getElementById('editPostModal'));
-                    modal.hide();
-                } else {
-                    alert('فشل تحديث المنشور: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error updating post:', error);
-                alert('حدث خطأ أثناء تحديث المنشور');
-            });
     });
 });
