@@ -1,19 +1,26 @@
 <?php
 require '../auth.php';
 
+function sendJsonResponse($status, $message, $httpStatusCode) {
+    http_response_code($httpStatusCode);
+    echo json_encode(["status" => $status, "message" => $message]);
+    exit;
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $subject = $_POST['subject'] ?? NULL;
     $title = $_POST['title'] ?? NULL;
     $content = $_POST['content'];
     $badge_names = $_POST['badges'] ?? NULL;
 
-    // التحقق من وجود المحتوى
-    if (empty($content)) {
-        echo json_encode(["status" => "error", "message" => "يجب إدخال المحتوى"]);
-        exit;
+    if ($subject === NULL) {
+        echo sendJsonResponse("error", "يجب اختيار مادة");
     }
 
-    // معالجة الشارات
+    if (empty($content)) {
+        echo sendJsonResponse("error", "يجب إدخال المحتوى");
+    }
+
     if (!empty($badge_names)) {
         $badge_colors = $_POST['badge_colors'] ?? [];
 
@@ -33,23 +40,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $uploaded_files = [];
     $original_file_names = [];
 
-    $allowed_extensions = ['jpg', 'jpeg', 'png', 'pdf'];
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'docx', 'doc', 'txt', 'pptx', 'xlsx', 'csv', 'zip', 'rar', 'mp4', 'avi', 'mov', 'mkv', 'webm'];
     $max_file_size = 5 * 1024 * 1024; // 5MB
-    $upload_dir = 'assets/files/';
+    $upload_dir = '../../../../assets/files/';
 
     if (!empty($_FILES['uploaded_files']['name'][0])) {
         foreach ($_FILES['uploaded_files']['name'] as $key => $original_name) {
             $file_tmp = $_FILES['uploaded_files']['tmp_name'][$key];
             $file_size = $_FILES['uploaded_files']['size'][$key];
-            $file_ext = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+            $file_ext = pathinfo($original_name, PATHINFO_EXTENSION);
 
-            if (!in_array($file_ext, $allowed_extensions)) {
-                echo "نوع الملف غير مسموح: $original_name";
+            if (!in_array(strtolower($file_ext), $allowed_extensions)) {
+                sendJsonResponse("warning", "نوع الملف غير مدعوم: $original_name");
                 continue;
             }
 
             if ($file_size > $max_file_size) {
-                echo "حجم الملف كبير جداً: $original_name";
+                sendJsonResponse("warning", "حجم الملف كبير جداً: $original_name");
                 continue;
             }
 
@@ -70,7 +77,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute();
     $stmt->close();
 
-    // إعادة توجيه المستخدم بعد النجاح
-    header("Location: community.php");
-    exit();
+    sendJsonResponse("success", "تم إرسال المنشور");
 }

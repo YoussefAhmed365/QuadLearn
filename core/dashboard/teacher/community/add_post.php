@@ -1,18 +1,26 @@
-<?php 
+<?php
 require '../auth.php';
 
+function sendJsonResponse($status, $message, $httpStatusCode) {
+    http_response_code($httpStatusCode);
+    echo json_encode(["status" => $status, "message" => $message]);
+    exit;
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $subject = $_POST['subject'] ?? NULL;
     $title = $_POST['title'] ?? NULL;
     $content = $_POST['content'];
     $badge_names = $_POST['badges'] ?? NULL;
 
-    // التحقق من وجود المحتوى
-    if (empty($content)) {
-        echo json_encode(["status" => "error", "message" => "يجب إدخال المحتوى"]);
-        exit;
+    if ($subject === NULL) {
+        echo sendJsonResponse("error", "يجب اختيار مادة");
     }
 
-    // معالجة الشارات
+    if (empty($content)) {
+        echo sendJsonResponse("error", "يجب إدخال المحتوى");
+    }
+
     if (!empty($badge_names)) {
         $badge_colors = $_POST['badge_colors'] ?? [];
 
@@ -32,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $uploaded_files = [];
     $original_file_names = [];
 
-    $allowed_extensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx'];
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'doc', 'txt', 'pptx', 'xlsx', 'zip', 'rar'];
     $max_file_size = 5 * 1024 * 1024; // 5MB
     $upload_dir = '../../../../assets/files/';
 
@@ -43,19 +51,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $file_ext = pathinfo($original_name, PATHINFO_EXTENSION);
 
             if (!in_array(strtolower($file_ext), $allowed_extensions)) {
-                echo "نوع الملف غير مسموح: $original_name";
+                sendJsonResponse("warning", "نوع الملف غير مدعوم: $original_name");
                 continue;
             }
 
             if ($file_size > $max_file_size) {
-                echo "حجم الملف كبير جداً: $original_name";
+                sendJsonResponse("warning", "حجم الملف كبير جداً: $original_name");
                 continue;
             }
 
             $random_name = uniqid() . '.' . $file_ext;
             if (move_uploaded_file($file_tmp, "$upload_dir$random_name")) {
                 $uploaded_files[] = $random_name;
-                $original_file_names[] = $original_name;
+                $original_file_names[] = htmlspecialchars($original_name);
             }
         }
     }
@@ -68,8 +76,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bind_param("issssss", $user_id, $data['subject'], $title, $content, $badge_json, $uploaded_files_json, $original_files_json);
     $stmt->execute();
     $stmt->close();
-    
-    // إعادة توجيه المستخدم بعد النجاح
-    header("Location: community.php");
-    exit();
+
+    sendJsonResponse("success", "تم إرسال المنشور");
 }

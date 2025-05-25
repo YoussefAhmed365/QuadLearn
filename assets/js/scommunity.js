@@ -56,6 +56,17 @@ function updateBadgeClass(badgeInput, color) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    // initialize Bootstrap Modal
+    const addPostModalElement = document.getElementById("addPost");
+
+    let addPostModal;
+    if (addPostModalElement) {
+        addPostModal = new bootstrap.Modal(addPostModalElement);
+    } else {
+        console.error("Add Post Modal Not Found.");
+        return;
+    }
+
     // Handle form submission with loading indicator and validation
     const addPostForm = document.getElementById('addPostForm');
     addPostForm.addEventListener('submit', function (e) {
@@ -73,8 +84,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!valid) {
             e.preventDefault();
         } else {
-            loadingSpinner.classList.remove('d-none');
             e.preventDefault();
+            loadingSpinner.classList.remove('d-none');
 
             fetch('add_post.php', {
                 method: 'POST',
@@ -82,8 +93,31 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(response => response.json())
             .then(data => {
-                
+                loadingSpinner.classList.add('d-none');
+                const alertDiv = document.createElement('div');
+                let messageClass;
+                if(data.status === 'success') messageClass = 'alert-success'
+                else if(data.status === 'error') messageClass = 'alert-danger'
+                else messageClass = 'alert-warning'
+                alertDiv.className = `alert ${messageClass}`;
+                alertDiv.textContent = data.message;
+                document.getElementById('addPostContainer').appendChild(alertDiv);
+
+                if (data.status === 'success') {
+                    setTimeout(() => {
+                        addPostModal.hide();
+                        addPostForm.reset();
+                        loadPosts('الرئيسية');
+                    }, 2000);
+                }
             })
+            .catch(error => {
+                loadingSpinner.classList.add('d-none');
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger';
+                alertDiv.textContent = 'حدث خطأ أثناء إضافة المنشور: ' + error.message;
+                document.getElementById('addPostContainer').appendChild(alertDiv);
+            });
         }
     });
 
