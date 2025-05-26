@@ -228,22 +228,22 @@ require '../auth.php';
                         <div class="col-md-9">
                             <div class="add-post rounded-3 bg-white shadow-sm p-3 mb-4 d-flex justify-content-between align-items-center">
                                 <h5 class="text-secondary m-0">إضافة منشور جديد</h5>
-                                <button type="button" class="btn btn-default" data-bs-toggle="modal" data-bs-target="#addPost"><i class="fa-solid fa-plus"></i></button>
+                                <button type="button" class="btn btn-default" data-bs-toggle="modal" data-bs-target="#addPostModal"><i class="fa-solid fa-plus"></i></button>
                             </div>
-                            <div class="modal fade" id="addPost" tabindex="-1" aria-labelledby="addPost" aria-hidden="true">
+                            <div class="modal fade" id="addPostModal" tabindex="-1" aria-labelledby="addPostModal" aria-hidden="true">
                                 <div class="modal-dialog modal-lg modal-fullscreen-md-down modal-dialog-centered modal-dialog-scrollable">
                                     <div class="modal-content">
                                         <div class="modal-header border-0">
-                                            <h1 class="modal-title fs-5" id="addPostLabel">ما الجديد اليوم؟</h1>
+                                            <h1 class="modal-title fs-5">ما الجديد اليوم؟</h1>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body px-5 pt-2">
-                                            <form id="addPostForm" action="add_post.php" method="POST" enctype="multipart/form-data">
+                                            <form id="addPostForm" method="POST" enctype="multipart/form-data">
                                                 <div class="row g-3 pb-5">
                                                     <div class="col-12">
-                                                        <label for="subject" class="form-label">المادة الدراسية</label>
+                                                        <label for="subject" class="form-label">المادة الدراسية<small class="text-danger">*</small></label>
                                                         <select name="subject" id="subject" class="form-select" required>
-                                                            <option selected disabled>--</option>
+                                                            <option value="" selected disabled>--</option>
                                                             <?php
                                                             $stmt = $conn->prepare("SELECT DISTINCT subject
                                                                                     FROM teachers
@@ -449,7 +449,7 @@ require '../auth.php';
                                         </button>
                                     </h2>
                                     <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                                        <div class="accordion-body rounded-4 bg-light">
+                                        <div class="accordion-body files-accordion rounded-4 bg-light">
                                             <?php
                                             $images = ["jpg", "jpeg", "png", "webp"];
                                             $word = ["doc", "docx"];
@@ -520,9 +520,9 @@ require '../auth.php';
                                                                 <div class="col-2 d-flex justify-content-center align-items-center">
                                                                     <i class="fa-solid <?php echo $icon; ?> me-1 fs-3"></i>
                                                                 </div>
-                                                                <div class="col">
-                                                                    <h6 class="mb-0 text-black"><?php echo htmlspecialchars($originalName); ?></h6>
-                                                                    <p class="mb-0 text-secondary"><?php echo htmlspecialchars("$first_name $last_name"); ?></p>
+                                                                <div class="col-10">
+                                                                    <h6 class="mb-0 text-black text-truncate"><?php echo htmlspecialchars($originalName); ?></h6>
+                                                                    <p class="mb-0 text-secondary text-truncate"><?php echo htmlspecialchars("$first_name $last_name"); ?></p>
                                                                 </div>
                                                             </a>
                                                             <?php

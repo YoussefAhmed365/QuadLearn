@@ -1,5 +1,5 @@
 <?php
-require $_SERVER['DOCUMENT_ROOT'] . '/website2/core/db_connect.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/quadlearn/QuadLearn/core/db_connect.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     // إعداد الجلسة مع خيارات الأمان

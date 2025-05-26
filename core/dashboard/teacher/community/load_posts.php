@@ -2,6 +2,11 @@
 require '../auth.php';
 require '../../../helper_functions.php';
 
+$images = ["jpg", "jpeg", "png", "webp"];
+$word = ["doc", "docx"];
+$excel = ["csv", "xlsx"];
+$video = ["mp4", "avi", "mov", "mkv", "webm"];
+
 $filterType = $_POST['filterType'] ?? 'الرئيسية'; // تحديد الفلتر الافتراضي
 $query = "";
 $stmt = null;
@@ -132,14 +137,30 @@ if ($result->num_rows > 0) {
             </div>
             <p class="content"><?php echo nl2br($content); ?></p>
             <?php if (!empty($uploaded_files) && is_array($uploaded_files) && !empty($original_file_names) && is_array($original_file_names)) { ?>
-                <div class="files table-responsive d-flex justify-content-start align-items-center gap-2 mb-3 pb-1">
-                    <?php foreach ($uploaded_files as $index => $file) { ?>
+                <div class="files overflow-x-scroll d-flex justify-content-start align-items-center gap-2 mb-3 pb-1">
+                    <?php
+                    foreach ($uploaded_files as $index => $file) { 
+                        $fileExtension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                        if (in_array($fileExtension, $video)) {
+                            $icon = "fa-file-video";
+                        } elseif (in_array($fileExtension, $word)) {
+                            $icon = "fa-file-word";
+                        } elseif (in_array($fileExtension, $excel)) {
+                            $icon = "fa-file-excel";
+                        } elseif (in_array($fileExtension, $images)) {
+                            $icon = "fa-image";
+                        } elseif ($fileExtension == "pdf") {
+                            $icon = "fa-file-pdf";
+                        } else {
+                            $icon = "fa-file";
+                        }
+                    ?>
                         <div class="file bg-white shadow-sm rounded-pill px-2 py-1">
                             <a href="../../../../assets/files/<?php echo htmlspecialchars($file); ?>"
                                 class="fileName d-flex justify-content-center align-items-center text-decoration-none text-black"
                                 download>
                                 <i
-                                    class="fa-solid fa-file-pdf me-1 fs-5"></i><?php echo htmlspecialchars($original_file_names[$index]); ?>
+                                    class="fa-solid <?php echo $icon; ?> me-1 fs-5"></i><?php echo htmlspecialchars($original_file_names[$index]); ?>
                             </a>
                         </div>
                     <?php } ?>
@@ -155,27 +176,27 @@ if ($result->num_rows > 0) {
                     </button>
                     <!-- Button لحذف المنشور -->
                     <button class="btn color-secondary delete-post-btn" data-delete-post="<?php echo $postId; ?>"
-                        data-bs-toggle="modal" data-bs-target="#deletePostModal">
+                        data-bs-toggle="modal" data-bs-target="#deletePostModal_<?php echo $postId; ?>">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                     <!-- Delete Post Modal -->
-                    <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel"
-                        role="dialog">
+                    <div class="modal fade" id="deletePostModal_<?php echo $postId; ?>" tabindex="-1"
+                        aria-labelledby="deletePostModalLabel_<?php echo $postId; ?>" role="dialog">
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="deletePostModalLabel">حذف المنشور</h5>
+                                    <h5 class="modal-title" id="deletePostModalLabel_<?php echo $postId; ?>">حذف المنشور</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <form method="POST" id="deletePostForm">
+                                <form method="POST" id="deletePostForm_<?php echo $postId; ?>">
                                     <div class="modal-body">
                                         هل أنت متأكد من رغبتك في حذف هذا المنشور؟
-                                        <input type="hidden" name="post_id" id="deletePostId" value="<?php echo $postId; ?>">
+                                        <input type="hidden" name="post_id" value="<?php echo $postId; ?>">
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
                                         <button type="submit" class="btn btn-danger confirm-delete-post"
-                                            data-post-id="<?php echo $postId; ?>" data-bs-dismiss="modal">حذف</button>
+                                            data-bs-dismiss="modal">حذف</button>
                                     </div>
                                 </form>
                             </div>

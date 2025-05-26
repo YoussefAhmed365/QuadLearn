@@ -11,6 +11,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // جلب مسارات الملفات المرتبطة بالمنشور
+    $query = "SELECT uploaded_files FROM community WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $postId);
+    $stmt->execute();
+    $stmt->bind_result($filesJson);
+    $stmt->fetch();
+    $stmt->close();
+
+    if (!empty($filesJson)) {
+        // إذا كانت الملفات مخزنة كـ JSON array
+        $files = json_decode($filesJson, true);
+        if (is_array($files)) {
+            foreach ($files as $fileName) {
+                // أضف مسار المجلد إلى اسم الملف
+                $filePath = "../../../../assets/files/$fileName";
+                if (!empty($fileName) && file_exists($filePath)) {
+                    @unlink($filePath);
+                }
+            }
+        }
+    }
+
     // تحضير استعلام التحديث
     $query = "DELETE FROM community WHERE id = ?";
     $stmt = $conn->prepare($query);

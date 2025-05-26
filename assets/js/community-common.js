@@ -56,26 +56,100 @@ function updateBadgeClass(badgeInput, color) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    // --- References to common elements ---
+    const addPostModalElement = document.getElementById('addPostModal');
+    const editPostModalElement = document.getElementById('editPostModal');
+    const commonModalElement = document.getElementById("commonModal");
+    const messageDiv = document.getElementById("messageDiv");
+
+    // Ensure modal elements exist before creating instances
+    let commonModal, addPostModal, editPostModal;
+    if (commonModalElement) {
+        commonModal = new bootstrap.Modal(commonModalElement);
+    } else {
+        console.error("Modal element not found!");
+        return;
+    }
+    if (addPostModalElement) {
+        addPostModal = new bootstrap.Modal(addPostModalElement);
+    } else {
+        console.error("Add post modal element not found!");
+        return;
+    }
+    if (editPostModalElement) {
+        editPostModal = new bootstrap.Modal(editPostModalElement);
+    } else {
+        console.error("Edit modal element not found!");
+        return;
+    }
+
+    // --- Show messages modal function ---
+    function showModal(state, message) {
+        let iconClass = 'fa-regular fa-circle-check text-success';
+        let interval = 5000;
+
+        if (state === "warning") {
+            iconClass = 'fa-solid fa-circle-exclamation text-warning';
+            interval = 2000;
+        } else if (state !== "success") {
+            iconClass = 'fa-regular fa-circle-xmark text-danger';
+            interval = 2000;
+        }
+
+        messageDiv.innerHTML = `<i class="${iconClass}" style="font-size: 5rem;"></i><h6 class="mt-3">${message}</h6>`;
+        commonModal.show();
+        
+        setTimeout(() => {
+            commonModal.hide();
+            messageDiv.innerHTML = '';
+        }, interval);
+    }
+    
     // Handle form submission with loading indicator and validation
     const form = document.getElementById('addPostForm');
     if (form) {
         form.addEventListener('submit', function (e) {
+            e.preventDefault();
             const loadingSpinner = document.getElementById('loadingSpinner');
+            loadingSpinner.classList.remove('d-none');
             const badgeInputs = document.querySelectorAll('input[name^="badges"]');
-            let valid = true;
+            let validSubmision = true;
 
             badgeInputs.forEach(input => {
                 if (input.value.trim() === '') {
                     alert('يجب إدخال اسم الشارة.');
-                    valid = false;
+                    validSubmision = false;
                 }
             });
 
-            if (!valid) {
-                e.preventDefault();
-            } else {
-                loadingSpinner.classList.remove('d-none');
+            if (validSubmision) {
+                const addPostBasePath = (userRole == 'teacher') ? '../../teacher/community/' : '../../student/community/';
+                const addPostUrl = `${addPostBasePath}add_post.php`;
+                fetch(addPostUrl, {
+                    method: 'POST',
+                    body: new FormData(form)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status == 'success') {
+                        addPostModal.hide();
+                        showModal(data.status, data.message);
+                        loadPosts('الرئيسية');
+                    } else if (data.status == 'warning') {
+                        addPostModal.hide();
+                        showModal(data.status, data.message);
+                        addPostModal.show();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding post:', error);
+                    addPostModal.hide();
+                    showModal('error', error);
+                })
             }
+            
+            loadingSpinner.classList.add('d-none');
+            validSubmision = false;
         });
     }
 
@@ -105,45 +179,15 @@ document.addEventListener("DOMContentLoaded", function () {
                         button.querySelector('i').classList.toggle('text-warning', !isBookmarked);
                     } else {
                         console.error('Failed to update bookmark status:', data.message);
-                        commonModal.show();
                         showModal('error', 'حدث خطأ أثناء حفظ المنشور.');
-                        setTimeout(() => {
-                            commonModal.hide();
-                            messageDiv.innerHTML = '';
-                        }, 2000);
                     }
                 })
                 .catch(error => {
                     console.error('Error updating bookmark status:', error);
-                    commonModal.show();
                     showModal('error', 'حدث خطأ أثناء حفظ المنشور.');
-                    setTimeout(() => {
-                        commonModal.hide();
-                        messageDiv.innerHTML = '';
-                    }, 2000);
                 });
         }
     });
-
-    // --- References to common elements ---
-    const editPostModalElement = document.getElementById('editPostModal');
-    const commonModalElement = document.getElementById("commonModal");
-    const messageDiv = document.getElementById("messageDiv");
-
-    // Ensure modal elements exist before creating instances
-    let commonModal, editPostModal;
-    if (commonModalElement) {
-        commonModal = new bootstrap.Modal(commonModalElement);
-    } else {
-        console.error("Modal element not found!");
-        return;
-    }
-    if (editPostModalElement) {
-        editPostModal = new bootstrap.Modal(editPostModalElement);
-    } else {
-        console.error("Edit modal element not found!");
-        return;
-    }
 
     // -- Get Attributes Of Edit Post Button --
     document.addEventListener('click', function (event) {
@@ -185,13 +229,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(data => {
                     if (data.success) {
                         editPostModal.hide();
-                        commonModal.show();
                         showModal('success', 'تم تحديث المنشور بنجاح!');
                         loadPosts('الرئيسية');
-                        setTimeout(() => {
-                            commonModal.hide();
-                            messageDiv.innerHTML = '';
-                        }, 2000);
                     } else {
                         showModal('error', 'فشل تحديث المنشور: ' + data.message);
                     }
@@ -199,60 +238,48 @@ document.addEventListener("DOMContentLoaded", function () {
                 .catch(error => {
                     console.error('Error updating post:', error);
                     editPostModal.hide();
-                    commonModal.show();
                     showModal('error', 'حدث خطأ أثناء تحديث المنشور');
-                    setTimeout(() => {
-                        commonModal.hide();
-                        messageDiv.innerHTML = '';
-                    }, 2000);
                 });
         });
     }
 
-    // --- Show modal function ---
-    function showModal(state, message) {
-        let iconClass = 'fa-regular fa-circle-check text-success';
-        if (state === "warning") iconClass = 'fa-solid fa-circle-exclamation text-warning';
-        else if (state !== "success") iconClass = 'fa-regular fa-circle-xmark text-danger';
-
-        messageDiv.innerHTML = `<i class="${iconClass}" style="font-size: 5rem;"></i><h6 class="mt-3">${message}</h6>`;
-    }
-
-    // --- Delete Post ---
+        // --- Delete Post ---
     document.addEventListener('submit', function (event) {
-        const deletePostForm = event.target.closest('#deletePostForm');
+        // Match any form with id starting with deletePostForm_
+        const deletePostForm = event.target.closest('form[id^="deletePostForm_"]');
         if (deletePostForm) {
             event.preventDefault();
-
-            const postId = deletePostForm.querySelector('#deletePostId').value;
-
+    
+            // Get the post_id from the hidden input
+            const postIdInput = deletePostForm.querySelector('input[name="post_id"]');
+            if (!postIdInput) {
+                showModal('error', 'لم يتم العثور على معرف المنشور.');
+                return;
+            }
+            const postId = postIdInput.value;
+    
             const formData = new FormData();
             formData.append('post_id', postId);
-
+    
             const deletePostBasePath = (userRole === 'teacher') ? '../../teacher/community/' : '../../student/community/';
             const deletePostUrl = `${deletePostBasePath}delete_post.php`;
-
+    
             fetch(deletePostUrl, {
                 method: 'POST',
                 body: formData,
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    if (data.state === 'success') {
+                    if (data.state === 'success' || data.success) {
+                        showModal('success', 'تم حذف المنشور بنجاح!');
                         loadPosts('الرئيسية');
-                        commonModal.hide();
                     } else {
-                        showModal(data.state, 'فشل حذف المنشور: ' + data.message);
+                        showModal(data.state || 'error', 'فشل حذف المنشور: ' + (data.message || ''));
                     }
                 })
                 .catch((error) => {
                     console.error('Error deleting post:', error);
-                    commonModal.show();
                     showModal('error', 'حدث خطأ أثناء حذف المنشور');
-                    setTimeout(() => {
-                        commonModal.hide();
-                        messageDiv.innerHTML = '';
-                    }, 2000);
                 });
         }
     });
@@ -300,12 +327,7 @@ function loadPosts(filterType) {
         })
         .catch(error => {
             console.error('Error loading posts:', error);
-            commonModal.show();
             showModal('error', 'حدث خطأ أثناء تحميل المنشورات يرجى المحاولة لاحقاً.');
-            setTimeout(() => {
-                commonModal.hide();
-                messageDiv.innerHTML = '';
-            }, 2000);
         });
 }
 

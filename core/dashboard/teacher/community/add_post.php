@@ -1,6 +1,8 @@
 <?php
 require '../auth.php';
 
+header("Content-Type: application/json; charset=utf-8");
+
 function sendJsonResponse($status, $message, $httpStatusCode) {
     http_response_code($httpStatusCode);
     echo json_encode(["status" => $status, "message" => $message]);
@@ -8,17 +10,12 @@ function sendJsonResponse($status, $message, $httpStatusCode) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $subject = $_POST['subject'] ?? NULL;
     $title = $_POST['title'] ?? NULL;
-    $content = $_POST['content'];
+    $content = $_POST['content'] ?? NULL;
     $badge_names = $_POST['badges'] ?? NULL;
 
-    if ($subject === NULL) {
-        echo sendJsonResponse("error", "يجب اختيار مادة");
-    }
-
-    if (empty($content)) {
-        echo sendJsonResponse("error", "يجب إدخال المحتوى");
+    if ($content == NULL) {
+        sendJsonResponse("error", "يجب إدخال المحتوى", 400);
     }
 
     if (!empty($badge_names)) {
@@ -36,35 +33,56 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $badge_json = NULL;
     }
 
-    // معالجة الملفات المرفوعة
+    // Process Uploaded Files
     $uploaded_files = [];
     $original_file_names = [];
+    $upload_errors = [];
 
-    $allowed_extensions = ['jpg', 'jpeg', 'png', 'pdf', 'docx', 'doc', 'txt', 'pptx', 'xlsx', 'zip', 'rar'];
+    $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'docx', 'doc', 'txt', 'pptx', 'xlsx', 'csv', 'zip', 'rar', 'mp4', 'avi', 'mov', 'mkv', 'webm'];
     $max_file_size = 5 * 1024 * 1024; // 5MB
     $upload_dir = '../../../../assets/files/';
+
+    // Ensure upload directory exists
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+    }
 
     if (!empty($_FILES['uploaded_files']['name'][0])) {
         foreach ($_FILES['uploaded_files']['name'] as $key => $original_name) {
             $file_tmp = $_FILES['uploaded_files']['tmp_name'][$key];
             $file_size = $_FILES['uploaded_files']['size'][$key];
-            $file_ext = pathinfo($original_name, PATHINFO_EXTENSION);
+            $file_ext = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
 
-            if (!in_array(strtolower($file_ext), $allowed_extensions)) {
-                sendJsonResponse("warning", "نوع الملف غير مدعوم: $original_name");
+            // Sanitize file name (remove unwanted characters)
+            $safe_original_name = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $original_name);
+
+            if (!in_array($file_ext, $allowed_extensions)) {
+                $upload_errors[] = "نوع الملف غير مدعوم: $safe_original_name";
                 continue;
             }
 
             if ($file_size > $max_file_size) {
-                sendJsonResponse("warning", "حجم الملف كبير جداً: $original_name");
+                $upload_errors[] = "حجم الملف كبير جداً: $safe_original_name";
                 continue;
             }
 
-            $random_name = uniqid() . '.' . $file_ext;
-            if (move_uploaded_file($file_tmp, "$upload_dir$random_name")) {
-                $uploaded_files[] = $random_name;
-                $original_file_names[] = htmlspecialchars($original_name);
+            $random_name = uniqid('file_', true) . '.' . $file_ext;
+            $destination = $upload_dir . $random_name;
+
+            if (is_uploaded_file($file_tmp)) {
+                if (move_uploaded_file($file_tmp, $destination)) {
+                    $uploaded_files[] = $random_name;
+                    $original_file_names[] = htmlspecialchars($safe_original_name);
+                } else {
+                    $upload_errors[] = "فشل رفع الملف: $safe_original_name";
+                }
+            } else {
+                $upload_errors[] = "ملف غير صالح: $safe_original_name";
             }
+        }
+
+        if (!empty($upload_errors)) {
+            sendJsonResponse("warning", implode(" | ", $upload_errors), 400);
         }
     }
 
@@ -77,5 +95,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute();
     $stmt->close();
 
-    sendJsonResponse("success", "تم إرسال المنشور");
+    sendJsonResponse("success", "تم إرسال المنشور", 200);
 }
