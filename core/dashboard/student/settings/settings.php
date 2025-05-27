@@ -201,176 +201,141 @@ require '../auth.php';
                 </nav>
             </header>
     
-            <div class="container-sm bg-white rounded-4 shadow p-5">
-                <h2>إعدادات الحساب</h2>
-                <h6>قم بإجراء تغييرات على معلوماتك الشخصية.</h6>
-                <br>
-
-                <!-- Display Error Message -->
-                <?php if (!empty($errorMessage)): ?>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
-                        <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
-                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                        </symbol>
-                    </svg>
-                    <div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
-                        <div class="d-flex align-items-center">
-                            <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-                            <div><?php echo htmlspecialchars($errorMessage); ?></div>
+            <div class="d-flex flex-column align-items-center">
+                <!-- Message Modal -->
+                <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-body" id="message"></div>
                         </div>
-                        <a href="settings.php">
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </a>
                     </div>
-                <?php endif; ?>
-                
-                <!-- Display Success Message -->
-                <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
-                        <symbol id="check-circle-fill" viewBox="0 0 16 16">
-                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                        </symbol>
-                    </svg>
-                    <div class="alert alert-success d-flex justify-content-between align-items-center" role="alert">
-                        <div class="d-flex align-items-center">
-                            <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
-                            <div>تم حفظ البيانات بنجاح</div>
+                </div>
+
+                <!-- Profile Settings -->
+                <div class="container-sm bg-white rounded-4 shadow p-5" style="width: clamp(70%, 1000px, 100%);">
+                    <h2>إعدادات الحساب</h2>
+                    <h6>قم بإجراء تغييرات على معلوماتك الشخصية.</h6>
+                    <br>
+
+                    <div id="edit-form" class="edit-form">
+                        <h4 class="mb-4">ملفك الشخصي</h4>
+                        <div class="row g-4 justify-content-around">
+                            <div class="col-md-6">
+                                <!-- Profile Photo -->
+                               <form id="uploadForm" action="profile_photo_handler.php" method="POST" enctype="multipart/form-data">
+                                   <input class="form-control" type="file" id="fileToUpload" name="fileToUpload" accept="image/*" required>
+                                   <button type="submit" class="btn btn-default w-100 mt-4 mb-3">حفظ</button>
+                                </form>
+    
+                                <!-- Account ID -->
+                                <div class="mb-3">
+                                    <label for="user_id" class="form-label">معرف الحساب</label>
+                                    <div class="idField d-flex align-items-center" id="identityShow">
+                                        <input type="text" class="form-control" id="user_id" value="<?php echo $user_id; ?>" readonly>
+                                        <i class="fa-regular fa-clipboard" id="copy-identity-icon" type="button" onclick="copyIdentity()" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <?php
+                                $target_dir = "../../../../assets/images/profiles/";
+                                $dir = (glob("$target_dir$user_id.*")) ? "$target_dir$user_id.webp" : "{$target_dir}default.png";
+                            ?>
+                            <img src="<?php echo $dir; ?>" alt="Profile Photo" class="rounded-circle col-md-6" style="width: clamp(200px, 200px, 100%);height: max-content;">
                         </div>
-                        <a href="settings.php">
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </a>
-                    </div>
-                <?php endif; ?>
-
-                <div id="message" class="alert" style="display:none;"></div>
-                
-                <div id="edit-form" class="edit-form">
-                    <h4 class="mb-4">ملفك الشخصي</h4>
-                    <div class="row g-4 justify-content-around">
-                        <div class="col-md-6">
-                            <!-- Profile Photo -->
-                           <form id="uploadForm" action="profile_photo_handler.php" method="POST" enctype="multipart/form-data">
-                               <input class="form-control" type="file" id="fileToUpload" name="fileToUpload" accept="image/*" required>
-                               <button type="submit" class="btn btn-default w-100 mt-4 mb-3">حفظ</button>
-                            </form>
-
-                            <!-- Account ID -->
+    
+                        <form id="updateAccountForm" method="POST" enctype="multipart/form-data">
                             <div class="mb-3">
-                                <label for="user_id" class="form-label">معرف الحساب</label>
-                                <div class="idField d-flex align-items-center" id="identityShow">
-                                    <input type="text" class="form-control" id="user_id" value="<?php echo $user_id ?>" disabled>
-                                    <i class="fa-regular fa-clipboard" id="copy-identity-icon" type="button" onclick="copyIdentity()"></i>
-                                </div>
+                                <label class="form-label" for="username">اسم المستخدم <b>.</b> خاص</label>
+                                <input class="form-control" type="text" id="username" name="username" value="<?php echo isset($user['username']) ? htmlspecialchars($user['username']) : ''; ?>" oninput="validateNewUsername()" required autocomplete="off">
+                                <div id="messageUsername" class="text-danger mt-1"></div>
                             </div>
-                        </div>
 
-                        <?php
-                            $target_dir = "../../../../assets/images/profiles/";
-                            $dir = (glob("$target_dir$user_id.*")) ? "$target_dir$user_id.webp" : "{$target_dir}default.png";
-                        ?>
-                        <img src="<?php echo $dir; ?>" alt="Profile Photo" class="rounded-circle col-md-6" style="width: clamp(200px, 200px, 100%);height: max-content;">
-                    </div>
-
-                    <form action="update-account.php" method="POST" enctype="multipart/form-data">
-                        <!-- Username -->
-                        <div class="mb-3">
-                            <label class="form-label" for="new_username">اسم المستخدم <b>.</b> خاص</label>
-                            <input class="form-control" type="text" id="new_username" name="new_username" value="<?php echo htmlspecialchars($user['username']); ?>" oninput="validateEnglishUsername()" required autocomplete="off">
-                            <div id="messageUsername" class="text-danger"></div>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="mb-3" id="passwordShow">
-                            <label class="form-label" for="new_password">كلمة المرور</label>
-                            <div class="d-flex align-items-center mb-0 gap-3">
-                                <div class="w-100">
-                                    <input class="form-control" type="password" id="new_password" name="new_password" oninput="validateEnglishPassword()" required autocomplete="new-password">
-                                    <div id="messagePassword" class="text-danger"></div>
-                                </div>
-                                <button class="btn btn-secondary rounded-5" type="button" onclick="togglePasswordVisibility()">إظهار</button>
-                            </div>
-                        </div>
-                
-                        <!-- Email -->
-                        <div class="mb-3">
-                            <label class="form-label" for="new_email">البريد الإلكتروني <b>.</b> خاص</label>
-                            <input class="form-control" type="email" id="new_email" name="new_email" value="<?php echo htmlspecialchars($user['email']); ?>" oninput="validateEnglishEmail()" required autocomplete="off">
-                            <div id="messageEmail" class="text-danger"></div>
-                        </div>
-
-                        <!-- Phone Number -->
-                        <div class="mb-3">
-                            <label class="form-label" for="new_phone_number">رقم الهاتف <b>.</b> عام</label>
-                            <input class="form-control" type="text" id="new_phone_number" name="new_phone_number" value="<?php echo htmlspecialchars($user['phone_number']); ?>" maxlength="11" oninput="validateEnglishPhone()" required autocomplete="off">
-                            <div id="messagePhone" class="text-danger"></div>
-                        </div>
-
-                        <!-- Guardian Number -->
-                        <div class="mb-3">
-                            <label class="form-label" for="new_guardian_phone">هاتف ولي الأمر <b>.</b> عام</label>
-                            <input class="form-control" type="text" id="new_guardian_phone" name="new_guardian_phone" value="<?php echo htmlspecialchars($data['guardian_phone']); ?>" maxlength="11" oninput="validateGuardianPhone()" required autocomplete="off">
-                            <div id="messageGPhone" class="text-danger"></div>
-                        </div>
-
-                        <!-- Level -->
-                         <div class="mb-3">
-                            <label for="" class="form-label">المرحلة</label>
-                            <select name="new_level" class="form-select">
-                                <option value="first" <?php echo ($data['level'] == "first") ? 'selected' : ''; ?>>الأول الثانوي</option>
-                                <option value="second" <?php echo ($data['level'] == "second") ? 'selected' : ''; ?>>الثاني الثانوي</option>
-                                <option value="third" <?php echo ($data['level'] == "third") ? 'selected' : ''; ?>>الثالث الثانوي</option>
-                            </select>
-                         </div>
-
-                        <!-- bio -->
-                        <div class="mb-3">
-                            <label class="form-label" for="new_bio">الوصف <b>.</b> عام</label>
-                            <textarea class="form-control" placeholder="أضف الوصف الخاص بك" id="new_bio" name="new_bio" maxlength="255" autocomplete="off" style="height: 100px"><?php echo htmlspecialchars($user['bio']); ?></textarea>
-                        </div>
-                
-                        <!-- Buttons -->
-                        <div class="container d-flex align-items-center gap-4 justify-content-between">
-                            <div>
-                                <button type="reset" class="btn btn-secondary rounded-5">إعادة التعيين</button>
-                                <button type="submit" class="btn btn-default rounded-5">حفظ</button>
-                            </div>
-                            <button type="button" class="btn btn-danger rounded-5" data-bs-toggle="modal" data-bs-target="#deleteModal">حذف الحساب</button>
-                        </div>
-                    </form>
-                
-                    <!-- Account Deletion Modal -->
-                    <form action="delete-teacher-account.php" method="POST">
-                        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title text-danger" id="deleteLabel">هل أنت متأكد من حذف الحساب؟</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <div class="mb-3">
+                                <label class="form-label" for="password">كلمة المرور الحالية</label>
+                                <div class="d-flex flex-column align-items-start position-relative mb-0 gap-3">
+                                    <div class="w-100">
+                                        <input class="form-control" type="password" id="password" name="password" oninput="validateCurrentPassword()" required autocomplete="current-password">
+                                        <i class="fa-regular fa-eye position-absolute" id="passwordToggleBtn" type="button" onclick="togglePasswordVisibility('password', 'passwordToggleBtn')" style="left: 20px; top: 12px; cursor: pointer;"></i>
                                     </div>
-                                    <div class="modal-body">
-                                        <p>يرجى تأكيد كلمة المرور لحذف الحساب</p>
-                                        <div class="mb-3">
-                                            <label class="form-label" for="confirmPassword">كلمة المرور</label>
-                                            <div class="d-flex align-items-center gap-3">
-                                                <div class="w-100">
-                                                    <input class="form-control" type="password" id="confirmPassword" name="confirmPassword" oninput="validateConfirmPassword()" required autocomplete="off" maxlength="20">
-                                                    <div id="messageConfirmPassword" class="text-danger"></div>
-                                                </div>
-                                                <button class="btn btn-secondary rounded-5" type="button" onclick="toggleConfirmPasswordVisibility()">إظهار</button>
-                                            </div>
+                                    <div id="messagePassword" class="text-danger mt-1"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" for="new_password">كلمة المرور الجديدة (اختياري)</label>
+                                <div class="d-flex flex-column align-items-start position-relative mb-0 gap-3">
+                                    <div class="w-100">
+                                        <input class="form-control" type="password" id="new_password" name="new_password" oninput="validateNewPassword()" autocomplete="new-password">
+                                        <i class="fa-regular fa-eye position-absolute" id="newPasswordToggleBtn" type="button" onclick="togglePasswordVisibility('new_password', 'newPasswordToggleBtn')" style="left: 20px; top: 12px; cursor: pointer;"></i>
+                                    </div>
+                                    <div id="messageNewPassword" class="text-danger mt-1"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" for="email">البريد الإلكتروني <b>.</b> خاص</label>
+                                <input class="form-control" type="email" id="email" name="email" value="<?php echo isset($user['email']) ? htmlspecialchars($user['email']) : ''; ?>" oninput="validateNewEmail()" required autocomplete="off">
+                                <div id="messageEmail" class="text-danger mt-1"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label" for="phone">رقم الهاتف <b>.</b> عام</label>
+                                <input class="form-control" type="text" id="phone" name="phone" value="<?php echo isset($user['phone_number']) ? htmlspecialchars($user['phone_number']) : ''; ?>" maxlength="11" oninput="validateNewPhone()" required autocomplete="off">
+                                <div id="messagePhone" class="text-danger mt-1"></div>
+                            </div>
+    
+                            <div class="mb-3">
+                                <label class="form-label" for="guardianPhone">هاتف ولي الأمر <b>.</b> عام</label>
+                                <input class="form-control" type="text" id="guardianPhone" name="guardian_phone" value="<?php echo !empty($data['guardian_phone']) ? htmlspecialchars($data['guardian_phone']) : ''; ?>" maxlength="11" oninput="validateGuardianPhone()" autocomplete="off">
+                                <div id="messageGPhone" class="text-danger"></div>
+                            </div>
+    
+                            <div class="mb-3">
+                                <label class="form-label" for="level">المرحلة</label>
+                                <select id="level" name="level" class="form-select">
+                                    <option value="first" <?php echo ($data['level'] == "first") ? 'selected' : ''; ?>>الأول الثانوي</option>
+                                    <option value="second" <?php echo ($data['level'] == "second") ? 'selected' : ''; ?>>الثاني الثانوي</option>
+                                    <option value="third" <?php echo ($data['level'] == "third") ? 'selected' : ''; ?>>الثالث الثانوي</option>
+                                </select>
+                            </div>
+    
+                            <div class="mb-3">
+                                <label class="form-label" for="bio">الوصف <b>.</b> عام</label>
+                                <textarea class="form-control" placeholder="أضف الوصف الخاص بك" id="bio" name="bio" maxlength="255" autocomplete="off" style="height: 100px;"><?php echo isset($user['bio']) ? htmlspecialchars($user['bio']) : ''; ?></textarea>
+                                <div id="messageBio" class="text-danger mt-1"></div>
+                            </div>
+
+                            <div class="d-flex flex-wrap align-items-center gap-3 justify-content-between mt-4">
+                                <div>
+                                    <button type="reset" id="resetBtn" class="btn btn-outline-secondary rounded-pill px-4">إعادة التعيين</button>
+                                    <button type="submit" class="btn btn-default rounded-pill px-4 ms-2">حفظ التغييرات</button>
+                                </div>
+                                <button type="button" class="btn btn-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#deleteAccountModal" id="deleteAccountButton">حذف الحساب</button>
+                            </div>
+                        </form>
+                    
+                        <form id="deleteAccountForm" method="POST">
+                            <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
+                            <input type="hidden" name="confirmPassword" id="confirmPassword">
+                            <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteLabel">هل أنت متأكد من حذف الحساب؟</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <?php if (isset($errorMessage)): ?>
-                                            <div class="alert alert-danger" role="alert"><?php echo $errorMessage; ?></div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-danger rounded-5">الحذف نهائياً</button>
+                                        <div class="modal-body">
+                                            <p>هل أنت متأكد من حذف الحساب نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-danger rounded-pill" data-bs-dismiss="modal">الحذف نهائياً</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <input type="hidden" name="user_id" value="<?php echo $user_id; ?>">
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -381,7 +346,7 @@ require '../auth.php';
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script src="https://kit.fontawesome.com/35b8a1f8f5.js" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="../../../../assets/js/ssettings.js"></script>
+    <script src="../../../../assets/js/settings.js"></script>
     <script src="../../../../assets/js/handle_student_notification_panel.js"></script>
 </body>
 </html>

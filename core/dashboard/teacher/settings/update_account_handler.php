@@ -1,8 +1,7 @@
 <?php
 require '../auth.php';
 header('Content-Type: application/json;charset=UTF-8');
-function sendJsonMessage($status, $message, $httpCode)
-{
+function sendJsonMessage($status, $message, $httpCode) {
     http_response_code($httpCode);
     echo json_encode(['status' => $status, 'message' => $message]);
     exit();
@@ -42,12 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // إذا كانت كلمة المرور غير فارغة، يتم تحديثها
             if ($new_password !== null) {
-                $stmt_password->bind_param("si", $new_password, $user_id);
+                $sql_password = "UPDATE users SET password = ? WHERE id = ?";
                 $stmt_password = $conn->prepare($sql_password);
-                $stmt_password->bind_param("si", $password, $user_id);
+                $stmt_password->bind_param("si", $new_password, $user_id);
                 $stmt_password->execute();
+                $stmt_password->close();
             }
-
 
             // تأكيد المعاملة
             $conn->commit();

@@ -60,10 +60,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const addPostModalElement = document.getElementById('addPostModal');
     const editPostModalElement = document.getElementById('editPostModal');
     const commonModalElement = document.getElementById("commonModal");
+    const subjectModalElement = document.getElementById("subjectModal");
     const messageDiv = document.getElementById("messageDiv");
 
     // Ensure modal elements exist before creating instances
-    let commonModal, addPostModal, editPostModal;
+    let commonModal, addPostModal, editPostModal, subjectModal;
     if (commonModalElement) {
         commonModal = new bootstrap.Modal(commonModalElement);
     } else {
@@ -78,6 +79,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (editPostModalElement) {
         editPostModal = new bootstrap.Modal(editPostModalElement);
+    } else {
+        console.error("Edit modal element not found!");
+        return;
+    }
+    if (subjectModalElement) {
+        subjectModal = new bootstrap.Modal(subjectModalElement);
     } else {
         console.error("Edit modal element not found!");
         return;
@@ -281,6 +288,37 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.error('Error deleting post:', error);
                     showModal('error', 'حدث خطأ أثناء حذف المنشور');
                 });
+        }
+    });
+
+    // --- Open Specific Subject Posts ---
+    document.addEventListener('click', function (event) {
+        const subjectBtn = event.target.closest('.subjectBtn');
+        if (subjectBtn) {
+            event.preventDefault();
+
+            const subjectName = subjectBtn.getAttribute('data-subject');
+            const teacherId = subjectBtn.getAttribute('data-teacher-id');
+            const Content = document.getElementById("modalContent");
+
+            fetch("get_specific_subject_posts.php", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `subjectName=${encodeURIComponent(subjectName)}&teacherId=${encodeURIComponent(teacherId)}`
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (Content) {
+                    Content.innerHTML = data;
+                    subjectModal.show();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading subject posts:', error);
+                showModal('error', 'حدث خطأ أثناء تحميل منشورات المادة.');
+            });
         }
     });
 });

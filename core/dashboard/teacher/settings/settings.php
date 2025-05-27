@@ -209,7 +209,7 @@ require '../auth.php';
                 </nav>
             </header>
 
-            <div class="d-flex flex-column align-items center">
+            <div class="d-flex flex-column align-items-center">
                 <!-- Message Modal -->
                 <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -301,7 +301,7 @@ require '../auth.php';
 
                             <div class="d-flex flex-wrap align-items-center gap-3 justify-content-between mt-4">
                                 <div>
-                                    <button type="reset" class="btn btn-outline-secondary rounded-pill px-4">إعادة التعيين</button>
+                                    <button type="reset" id="resetBtn" class="btn btn-outline-secondary rounded-pill px-4">إعادة التعيين</button>
                                     <button type="submit" class="btn btn-default rounded-pill px-4 ms-2">حفظ التغييرات</button>
                                 </div>
                                 <button type="button" class="btn btn-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#deleteModal" id="deleteAccountButton">حذف الحساب</button>
@@ -339,7 +339,7 @@ require '../auth.php';
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://kit.fontawesome.com/35b8a1f8f5.js" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script src="../../../../assets/js/tsettings.js"></script>
+    <script src="../../../../assets/js/settings.js"></script>
     <script src="../../../../assets/js/handle_teacher_notification_panel.js"></script>
 </body>
 </html>

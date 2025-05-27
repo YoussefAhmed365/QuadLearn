@@ -380,7 +380,7 @@ require '../auth.php';
                                                         $last_name = $teacher['last_name'];
                                                         $subject = $teacher['subject'];
                                                         ?>
-                                                        <button class="row btn btn-light d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#subjectModal" data-subject="<?php echo htmlspecialchars($subject); ?>" data-teacher-id="<?php echo $teacher_id; ?>">
+                                                        <button class="row btn btn-light d-flex align-items-center subjectBtn" data-bs-toggle="modal" data-bs-target="#subjectModal" data-subject="<?php echo htmlspecialchars($subject); ?>" data-teacher-id="<?php echo $teacher_id; ?>">
                                                             <div class="col-4 overflow-hidden rounded d-flex justify-content-center align-items-center">
                                                                 <img src="../../../../assets/images/<?php echo htmlspecialchars($subject); ?>.webp" alt="subject">
                                                             </div>
@@ -416,15 +416,17 @@ require '../auth.php';
                                                 $stmt->close();
                                                 ?>
 
-                                                <!-- Subject Posts -->
+                                                <!-- Subject Modal -->
                                                 <div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
-                                                    <div class="modal-dialog modal-xl modal-fullscreen-md-down modal-dialog-centered modal-dialog-scrollable">
+                                                    <div class="modal-dialog modal-dialog-centered modal-lg">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
-                                                                <h1 class="modal-title fs-5" id="subjectModalLabel">منشورات المادة</h1>
+                                                                <h5 class="modal-title" id="subjectModalLabel">منشورات المادة</h5>
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
-                                                            <div class="modal-body" id="modal-content"></div>
+                                                            <div class="modal-body" id="modalContent">
+                                                                <!-- سيتم تحميل منشورات المادة هنا -->
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
