@@ -163,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <span>تذكرني لمدة 30 يوماً</span>
                                         </span>
                                     </div>
-                                    <a href="account-recovery.php" class="text-default col-md text-md-end">نسيت كلمة المرور</a>
+                                    <a href="../account_recover/account_recovery.php" class="text-default col-md text-md-end">نسيت كلمة المرور</a>
                                 </div>
                                 <button type="submit" class="btn btn-default w-100 mb-4">دخول</button>
                             </form>

@@ -41,6 +41,15 @@ CREATE TABLE auth_tokens (
     CONSTRAINT auth_tokens_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE account_recovery_otps (
+    id INT(11) PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(255) NOT NULL,
+    otp VARCHAR(10) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NOT NULL,
+    used TINYINT(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE community (
     id int(11) PRIMARY KEY AUTO_INCREMENT,
     user_id int(11) NOT NULL,
