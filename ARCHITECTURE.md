@@ -18,10 +18,12 @@ QuadLearn is an educational web platform for secondary school students and teach
 
 ## Main Directories & Files
 
+### The platform strating page is `index.html`.
+
 ### 1. `assets/`
 Contains all static assets for the platform.
 - **css/**: Stylesheets for various pages/components.
-- **files/**: Uploaded files by users.
+- **files/**: Uploaded files by users in community posts.
 - **icons/**: SVG and other icon assets.
 - **images/**: Images used throughout the site (includes subject images, logos, etc.).
 - **js/**: JavaScript files for page interactivity and logic.
