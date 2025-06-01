@@ -15,9 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteConfirmationModalElement = document.getElementById('deleteConfirmationModal');
     const deleteAllStudentsModalElement = document.getElementById('deleteAllStudentsConfirmation');
     const addAssistantModalElement = document.getElementById('addAssistantModal');
+    const degreesModalElement = document.getElementById('degreesModal');
 
     // Ensure modal elements exist before creating instances
-    let uploadDegreeModal, uploadStatusModal, deleteConfirmationModal, deleteAllStudentsModal, addAssistantModal;
+    let uploadDegreeModal, uploadStatusModal, deleteConfirmationModal, deleteAllStudentsModal, addAssistantModal, degreesModal;
     if (uploadDegreeModalElement) {
         uploadDegreeModal = new bootstrap.Modal(uploadDegreeModalElement);
     } else {
@@ -46,6 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
         addAssistantModal = new bootstrap.Modal(addAssistantModalElement);
     } else {
         console.error("Add Assistant modal element not found!");
+        return; // Critical modal is missing
+    }
+    if (degreesModalElement) {
+        degreesModal = new bootstrap.Modal(degreesModalElement);
+    } else {
+        console.error("Degrees modal modal element not found!");
         return; // Critical modal is missing
     }
 
@@ -144,11 +151,11 @@ document.addEventListener("DOMContentLoaded", () => {
             messageDiv.innerHTML = '<div class="d-flex align-items-center justify-content-center p-3 mx-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mb-0 ms-2">جاري رفع الملف...</p></div>';
             uploadStatusModal.show();
             const formData = new FormData(uploadForm);
-            
+
             if (useFileNameCheckbox.checked) {
                 formData.set('examTitle', FileInput.files.length > 0 ? FileInput.files[0].name : "");
             }
-            
+
             try {
                 const response = await fetch("upload_test_degree.php", {
                     method: 'POST',
@@ -319,31 +326,31 @@ document.addEventListener("DOMContentLoaded", () => {
             method: 'POST',
             headers: { "X-Requested-With": "XMLHttpRequest" },
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-check text-success" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'تم حذف جميع الطلاب.'}</h6></div>`;
-                updateTable('studentTable'); // Refresh the student table
-            } else {
-                messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'حدث خطأ أثناء حذف جميع الطلاب.'}</h6></div>`;
-            }
-        })
-        .catch(error => {
-            console.error('Error deleting all students:', error);
-            messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${error.message || 'حدث خطأ غير متوقع أثناء حذف جميع الطلاب.'}</h6></div>`;
-        })
-        .finally(() => {
-            uploadStatusModal.show();
-            setTimeout(() => {
-                if (uploadStatusModal) uploadStatusModal.hide();
-                updateTable('studentTable'); // Refresh the student table
-            }, 3000);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-check text-success" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'تم حذف جميع الطلاب.'}</h6></div>`;
+                    updateTable('studentTable'); // Refresh the student table
+                } else {
+                    messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'حدث خطأ أثناء حذف جميع الطلاب.'}</h6></div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting all students:', error);
+                messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${error.message || 'حدث خطأ غير متوقع أثناء حذف جميع الطلاب.'}</h6></div>`;
+            })
+            .finally(() => {
+                uploadStatusModal.show();
+                setTimeout(() => {
+                    if (uploadStatusModal) uploadStatusModal.hide();
+                    updateTable('studentTable'); // Refresh the student table
+                }, 3000);
+            });
     });
 
     // --- Event Delegation for Delete Buttons in Tables ---
@@ -431,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     uploadStatusModal.hide();
                 }, 5000); // Keep modal longer for warnings
             }
-            
+
         } catch (error) {
             console.error('Error adding assistant:', error);
             messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${error.message || 'حدث خطأ غير متوقع أثناء إضافة المساعد.'}</h6></div>`;
@@ -446,4 +453,43 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Initial Load for tables if needed ---
     // Example: updateTable('studentTable', studentSearchInput ? studentSearchInput.value : '');
     // updateTable('assistantContainer'); // Load assistants initially
+
+    // --- Show Students Degrees ---
+    const viewDegreesBtn = document.getElementById('viewDegreesBtn');
+    const degreesContainer = document.getElementById('degreesContainer');
+
+    async function loadDegreesReport(testId = "") {
+        if (!degreesContainer) return;
+        degreesContainer.innerHTML = '<div class="d-flex align-items-center justify-content-center p-5"><div class="spinner-border text-primary" role="status"></div><p class="mb-0 ms-3 fs-5">جاري تحميل التقرير...</p></div>';
+        const formData = new FormData();
+        if (testId) formData.append('test_id', testId);
+
+        try {
+            const response = await fetch('degrees_report.php', {
+                method: 'POST',
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+                body: formData
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                degreesContainer.innerHTML = data.pageContent;
+                // Attach change event to dropdown
+                const select = document.getElementById('degreeReport_test_id_selector');
+                if (select) {
+                    select.onchange = () => loadDegreesReport(select.value);
+                }
+            } else {
+                degreesContainer.innerHTML = `<div class="alert alert-warning text-center m-3">${data.message || 'تعذر تحميل التقرير.'}</div>`;
+            }
+        } catch (error) {
+            degreesContainer.innerHTML = `<div class="alert alert-danger text-center m-3">خطأ في تحميل التقرير: ${error.message}</div>`;
+        }
+    }
+
+    if (viewDegreesBtn && degreesModal) {
+        viewDegreesBtn.addEventListener('click', () => {
+            degreesModal.show();
+            loadDegreesReport();
+        });
+    }
 });

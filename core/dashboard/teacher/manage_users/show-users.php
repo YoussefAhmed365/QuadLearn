@@ -256,7 +256,7 @@ $assistantCount = $rowAssistants['assistantCount'];
                                             <button class="btn btn-default w-100" id="addDegreeBtn" data-bs-toggle="modal" data-bs-target="#uploadDegreeModal">إضافة درجات إختبار</button>
                                         </div>
                                         <div class="col-sm-4">
-                                            <button class="btn btn-default w-100" id="viewDegreesBtn">سجل الدرجات</button>
+                                            <button class="btn btn-default w-100" id="viewDegreesBtn" data-bs-toggle="modal" data-bs-target="#degreesModal">سجل الدرجات</button>
                                         </div>
                                         <div class="col-sm-4">
                                             <button class="btn btn-danger w-100" id="deleteAllStudents" data-bs-toggle="modal" data-bs-target="#deleteAllStudentsConfirmation">حذف جميع الطلاب</button>
@@ -318,8 +318,7 @@ $assistantCount = $rowAssistants['assistantCount'];
         <div class="modal fade" id="uploadStatusModal" tabindex="-1" aria-labelledby="uploadStatusModalLabel">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <div class="modal-body d-flex flex-column justify-content-center align-items-center gap-3" id="uploadStatus">
-                        </div>
+                    <div class="modal-body d-flex flex-column justify-content-center align-items-center gap-3" id="uploadStatus"></div>
                 </div>
             </div>
         </div>
@@ -384,6 +383,21 @@ $assistantCount = $rowAssistants['assistantCount'];
                                 <i class="fa-solid fa-user-plus me-1"></i> إضافة المساعد
                             </button>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Degrees Modal -->
+        <div class="modal fade" id="degreesModal" tabindex="-1" aria-labelledby="degreesModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                  <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="degreesModalLabel">درجات الطلاب</h1>
+                        <button type="button" class="btn text-secondary border-0 p-0" data-bs-dismiss="modal" aria-label="Close"><i class="fa-solid fa-arrow-left fs-3"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="degreesContainer"></div>
                     </div>
                 </div>
             </div>

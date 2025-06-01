@@ -1,3 +1,12 @@
+CREATE TABLE account_recovery_otps (
+    id int(11) PRIMARY KEY AUTO_INCREMENT,
+    email varchar(255) NOT NULL,
+    otp varchar(10) NOT NULL,
+    created_at datetime NOT NULL DEFAULT current_timestamp(),
+    expires_at datetime NOT NULL,
+    used tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE answers (
     id int(11) PRIMARY KEY AUTO_INCREMENT,
     question_id int(11) DEFAULT NULL,
@@ -61,6 +70,14 @@ CREATE TABLE community (
     created_at timestamp NOT NULL DEFAULT current_timestamp(),
     updated_at timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
     CONSTRAINT ibfk_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE exams (
+    id bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    teacher_id int(11) NOT NULL,
+    title varchar(255) NOT NULL,
+    created_at timestamp NOT NULL DEFAULT current_timestamp(),
+    CONSTRAINT exams_ibfk_1 FOREIGN KEY (teacher_id) REFERENCES teachers (id) ON DELETE CASCADE ON UPDATE CASCADE;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE saved_posts (
@@ -135,6 +152,18 @@ CREATE TABLE student_notifications (
     read_status tinyint(1) NOT NULL DEFAULT 0,
     CONSTRAINT student_notifications_ibfk_1 FOREIGN KEY (notification_id) REFERENCES notifications (id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT student_notifications_ibfk_2 FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE student_score (
+    id bigint(20) PRIMARY KEY AUTO_INCREMENT,
+    teacher_id int(11) NOT NULL,
+    exam_id bigint(20) NOT NULL,
+    student_email varchar(255) NOT NULL,
+    test_date timestamp NOT NULL DEFAULT current_timestamp(),
+    full_test_degree decimal(5,2) NOT NULL,
+    score decimal(5,2) NOT NULL,
+    CONSTRAINT exam_id_score_ibfk FOREIGN KEY (exam_id) REFERENCES exams (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT teacher_id_score_ibfk FOREIGN KEY (teacher_id) REFERENCES teachers (id) ON DELETE CASCADE ON UPDATE CASCADE;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE subject_files (
