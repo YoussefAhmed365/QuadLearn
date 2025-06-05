@@ -175,18 +175,22 @@ if ($result->num_rows > 0) {
                         <h6 class="mb-0"><small><?php echo $updated_at; ?></small></h6>
                     </div>
                 </div>
-                <?php if (!empty($badges) && is_array($badges)) { ?>
-                    <div class="col-sm badges row overflow-x-scroll flex-nowrap pb-1 d-flex align-items-center justify-content-end">
-                        <?php foreach ($badges as $badge) {
-                            $badgeName = isset($badge['name']['name']) ? htmlspecialchars($badge['name']['name']) : "اسم غير متوفر";
-                            $badgeColor = isset($badge['name']['color']) ? htmlspecialchars($badge['name']['color']) : "badge-default";
-                            ?>
-                            <div class="text-truncate col-auto ms-2 px-3 py-0 badge-<?php echo $badgeColor; ?>">
-                                <?php echo $badgeName; ?>
-                            </div>
-                        <?php } ?>
-                    </div>
-                <?php } ?>
+                <?php $badges_json = $row['badges'];
+                if (!empty($badges)) {
+                    $badgesArray = json_decode($badges_json, true);
+                    if (is_array($badgesArray)) { ?>
+                        <div class="col-sm badges row overflow-x-scroll flex-nowrap pb-1 d-flex align-items-center justify-content-end">
+                            <?php foreach ($badgesArray as $badge) {
+                                $badgeName = isset($badge['name']) ? htmlspecialchars(trim($badge['name'])) : "اسم غير متوفر";
+                                $badgeColor = isset($badge['color']) ? htmlspecialchars(trim($badge['color'])) : "default"; // Or use 'secondary', 'primary' etc. as a CSS class name if color is not green/yellow/red
+                                ?>
+                                <div class="text-truncate col-auto ms-2 px-3 py-0 badge-<?php echo $badgeColor; ?>">
+                                    <?php echo $badgeName; ?>
+                                </div>
+                            <?php } ?>
+                        </div>
+                    <?php }
+                } ?>
             </div>
             <p class="content"><?php echo nl2br($content); ?></p>
             <?php if (!empty($uploaded_files) && is_array($uploaded_files) && !empty($original_file_names) && is_array($original_file_names)) { ?>
@@ -207,7 +211,7 @@ if ($result->num_rows > 0) {
                         } else {
                             $icon = "fa-file";
                         }
-                    ?>
+                        ?>
                         <div class="file bg-white shadow-sm rounded-pill px-2 py-1">
                             <a href="../../../../assets/files/<?php echo htmlspecialchars($file); ?>"
                                 class="fileName d-flex justify-content-center align-items-center text-decoration-none text-black"

@@ -520,6 +520,13 @@ h6 small {
 .fa-file-video {
     color: mediumpurple !important;
 }
+.delete-file-icon {
+    color: var(--bs-secondary-color);
+    transition: all 0.3s ease;
+}
+.delete-file-icon:hover {
+    color: var(--bs-danger-color);
+}
 @media (max-width: 768px) {
     main {
         width: 100%;
@@ -533,3 +540,27 @@ h6 small {
         display: none;
     }
 }
+
+.badge-input-name {
+    border-width: 1px !important; /* Ensure border is visible */
+    border-style: solid !important;
+    transition: border-color 0.15s ease-in-out;
+}
+#editExistingFiles .bg-light {
+    background-color: #f8f9fa !important;
+}
+#editExistingFiles .delete-existing-file-btn i,
+.badge-item .remove-badge-btn i {
+    pointer-events: none; /* Ensure icon click triggers button */
+}
+.form-check-label.badge { /* For badge color selection labels */
+    padding: 0.3em 0.6em;
+    font-size: 0.85em;
+    cursor: pointer;
+}
+.delete-existing-file-btn:disabled + .d-flex, /* Style for deleted file text */
+.delete-existing-file-btn[disabled] ~ .d-flex span { /* More specific for text */
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+.files-accordion .file-box i {font-size: 1.5rem;} /* Adjust if needed */

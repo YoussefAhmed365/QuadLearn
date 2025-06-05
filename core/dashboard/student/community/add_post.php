@@ -1,101 +1,156 @@
 <?php
-require '../auth.php';
+require '../auth.php'; // Ensure this path is correct and $user_id, $conn, and potentially $data['subject'] are available.
 
 header("Content-Type: application/json; charset=utf-8");
 
-function sendJsonResponse($status, $message, $httpStatusCode) {
+// Function to send JSON response
+function sendJsonResponse($status, $message, $httpStatusCode = 200) {
     http_response_code($httpStatusCode);
     echo json_encode(["status" => $status, "message" => $message]);
     exit;
 }
 
+// Helper function for more descriptive upload errors
+function upload_error_message($error_code) {
+    switch ($error_code) {
+        case UPLOAD_ERR_OK:
+            return '';
+        case UPLOAD_ERR_INI_SIZE:
+            return 'الملف يتجاوز الحد المسموح به في php.ini.';
+        case UPLOAD_ERR_FORM_SIZE:
+            return 'الملف يتجاوز الحد المسموح به في النموذج.';
+        case UPLOAD_ERR_PARTIAL:
+            return 'تم رفع جزء من الملف فقط.';
+        case UPLOAD_ERR_NO_FILE:
+            return 'لم يتم رفع أي ملف.';
+        case UPLOAD_ERR_NO_TMP_DIR:
+            return 'مجلد الملفات المؤقت مفقود على الخادم.';
+        case UPLOAD_ERR_CANT_WRITE:
+            return 'فشل الكتابة إلى القرص على الخادم.';
+        case UPLOAD_ERR_EXTENSION:
+            return 'أحد الإضافات في الخادم أوقف عملية الرفع.';
+        default:
+            return 'خطأ غير معروف في عملية الرفع.';
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $subject = $_POST['subject'] ?? NULL;
-    $title = $_POST['title'] ?? NULL;
-    $content = $_POST['content'] ?? NULL;
-    $badge_names = $_POST['badges'] ?? NULL;
+    $title = isset($_POST['title']) ? trim($_POST['title']) : NULL;
+    $content = isset($_POST['content']) ? trim($_POST['content']) : NULL;
     
-    if (empty($subject)) {
-        sendJsonResponse("warning", "يجب اختيار مادة", 400);
-    }
+    // Badges are now expected as a JSON string: [{"name":"...","color":"..."}, ...]
+    $badges_json_input = $_POST['badges'] ?? '[]';
+    $decoded_badges = json_decode($badges_json_input, true);
 
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        sendJsonResponse("error", "بيانات الشارات غير صالحة (JSON format error).", 400);
+    }
+    
     if (empty($content)) {
-        sendJsonResponse("warning", "يجب إدخال المحتوى", 400);
+        sendJsonResponse("error", "يجب إدخال محتوى المنشور.", 400);
     }
 
-    if (!empty($badge_names)) {
-        $badge_colors = $_POST['badge_colors'] ?? [];
-
-        $badges = [];
-        foreach ($badge_names as $index => $name) {
-            if (!empty($name)) {
-                $badges[] = ['name' => $name, 'color' => $badge_colors[$index] ?? 'green'];
+    $badges_to_save_db = [];
+    if (is_array($decoded_badges)) {
+        foreach ($decoded_badges as $badge_item) {
+            if (!empty($badge_item['name'])) {
+                $name = htmlspecialchars(trim($badge_item['name']));
+                $color = isset($badge_item['color']) && is_string($badge_item['color']) 
+                         ? htmlspecialchars(trim($badge_item['color'])) 
+                         : 'green';
+                $badges_to_save_db[] = ['name' => $name, 'color' => $color];
             }
         }
-
-        $badge_json = json_encode($badges);
-    } else {
-        $badge_json = NULL;
     }
+    $badge_json_for_db = !empty($badges_to_save_db) ? json_encode($badges_to_save_db) : NULL;
 
     // Process Uploaded Files
-    $uploaded_files = [];
-    $original_file_names = [];
+    $uploaded_server_files = [];
+    $original_file_names_for_db = [];
     $upload_errors = [];
 
     $allowed_extensions = ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'docx', 'doc', 'txt', 'pptx', 'xlsx', 'csv', 'zip', 'rar', 'mp4', 'avi', 'mov', 'mkv', 'webm'];
     $max_file_size = 5 * 1024 * 1024; // 5MB
     $upload_dir = '../../../../assets/files/';
 
-    // Ensure upload directory exists
+    // Ensure upload directory exists and is writable
     if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true);
+        if (!mkdir($upload_dir, 0775, true)) {
+            sendJsonResponse("error", "فشل في إنشاء مجلد الرفع على الخادم.", 500);
+        }
+    }
+    if (!is_writable($upload_dir)){
+        sendJsonResponse("error", "مجلد الرفع على الخادم غير قابل للكتابة.", 500);
     }
 
-    if (!empty($_FILES['uploaded_files']['name'][0])) {
+    if (isset($_FILES['uploaded_files']) && !empty($_FILES['uploaded_files']['name'][0])) {
         foreach ($_FILES['uploaded_files']['name'] as $key => $original_name) {
+            if (empty(trim($original_name))) continue;
+
             $file_tmp = $_FILES['uploaded_files']['tmp_name'][$key];
             $file_size = $_FILES['uploaded_files']['size'][$key];
+            $file_error = $_FILES['uploaded_files']['error'][$key];
+            
+            $error_message = upload_error_message($file_error);
+            if ($error_message && $file_error !== UPLOAD_ERR_NO_FILE) {
+                $upload_errors[] = htmlspecialchars($original_name) . ": " . $error_message;
+                continue;
+            }
+            if($file_error === UPLOAD_ERR_NO_FILE) continue;
+
             $file_ext = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+            $safe_original_name = htmlspecialchars(trim($original_name));
 
             if (!in_array($file_ext, $allowed_extensions)) {
-                $upload_errors[] = "نوع الملف غير مدعوم: $original_name";
+                $upload_errors[] = "نوع الملف غير مدعوم: " . $safe_original_name;
                 continue;
             }
 
             if ($file_size > $max_file_size) {
-                $upload_errors[] = "حجم الملف كبير جداً: $original_name";
+                $upload_errors[] = "حجم الملف كبير جداً (" . round($file_size / 1024 / 1024, 2) . "MB): " . $safe_original_name . " (الحد الأقصى 5MB)";
                 continue;
             }
+            
+            $random_server_name = uniqid('file_', true) . '_' . bin2hex(random_bytes(4)) . '.' . $file_ext;
+            $destination = $upload_dir . $random_server_name;
 
-            $random_name = uniqid('file_', true) . '.' . $file_ext;
-            $destination = "$upload_dir$random_name";
-
-            if (is_uploaded_file($file_tmp)) {
-                if (move_uploaded_file($file_tmp, $destination)) {
-                    $uploaded_files[] = $random_name;
-                    $original_file_names[] = htmlspecialchars($original_name);
-                } else {
-                    $upload_errors[] = "فشل رفع الملف: $original_name";
-                }
+            if (move_uploaded_file($file_tmp, $destination)) {
+                $uploaded_server_files[] = $random_server_name;
+                $original_file_names_for_db[] = $safe_original_name;
             } else {
-                $upload_errors[] = "ملف غير صالح: $original_name";
+                $upload_errors[] = "فشل في نقل الملف المرفوع: " . $safe_original_name;
             }
-        }
-
-        if (!empty($upload_errors)) {
-            sendJsonResponse("warning", implode(" | ", $upload_errors), 400);
         }
     }
 
-    $uploaded_files_json = json_encode($uploaded_files);
-    $original_files_json = json_encode($original_file_names);
+    $uploaded_files_json_for_db = !empty($uploaded_server_files) ? json_encode($uploaded_server_files) : NULL;
+    $original_files_json_for_db = !empty($original_file_names_for_db) ? json_encode($original_file_names_for_db) : NULL;
 
-    // إدخال البيانات في قاعدة البيانات
-    $stmt = $conn->prepare("INSERT INTO community (user_id, subject, title, content, badges, uploaded_files, original_file_names) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("issssss", $user_id, $subject, $title, $content, $badge_json, $uploaded_files_json, $original_files_json);
-    $stmt->execute();
+    // --- Database Insertion ---
+    // IMPORTANT: Ensure $data['subject'] is available from your auth.php or other included files.
+    $subject_for_db = isset($data['subject']) ? $data['subject'] : NULL;
+
+    $stmt = $conn->prepare("INSERT INTO community (user_id, subject, title, content, badges, uploaded_files, original_file_names, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+    if (!$stmt) {
+        sendJsonResponse("error", "خطأ في تجهيز استعلام قاعدة البيانات.", 500);
+    }
+    
+    $stmt->bind_param("issssss", $user_id, $subject_for_db, $title, $content, $badge_json_for_db, $uploaded_files_json_for_db, $original_files_json_for_db);
+    
+    if ($stmt->execute()) {
+        $final_message = "تم نشر المنشور بنجاح.";
+        if (!empty($upload_errors)) {
+            $final_message .= " بعض الملفات لم يتم رفعها: " . implode("; ", $upload_errors);
+            sendJsonResponse("warning", $final_message, 200);
+        } else {
+            sendJsonResponse("success", $final_message, 201);
+        }
+    } else {
+        sendJsonResponse("error", "حدث خطأ أثناء حفظ المنشور في قاعدة البيانات.", 500);
+    }
     $stmt->close();
+    $conn->close();
 
-    sendJsonResponse("success", "تم إرسال المنشور", 200);
+} else {
+    sendJsonResponse("error", "طلب غير صالح.", 405);
 }

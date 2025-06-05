@@ -29,6 +29,9 @@
     background: #0f2422 !important;
     border-color: #0f2422 !important;
 }
+.spinner-border-default{
+    border-color: #3e8e7c !important;
+}
 html, body{
     margin: 0 !important;
     padding: 0 !important;
