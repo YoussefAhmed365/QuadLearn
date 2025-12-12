@@ -28,6 +28,7 @@ An educational platform called "QuadLearn" for secondary school students, where 
 *   CSS
 *   Bootstrap
 *   Vanilla Javascript
+*   jQuery
 *   Node.js (For websocket only to handle real-time notifications)
 *   PHP
 *   MySQL
