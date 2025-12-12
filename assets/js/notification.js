@@ -95,12 +95,25 @@ document.addEventListener("DOMContentLoaded", function () {
         const notificationsList = document.getElementById("notificationsList");
         if (!notificationsList) return;
 
-        notificationsList.innerHTML = `
+        // Using a standard placeholder or check if dotlottie-player is available
+        // If not available, use a simple text or image.
+        const hasLottie = document.querySelector('script[src*="dotlottie-player"]');
+        let content = '';
+        if (hasLottie) {
+            content = `
             <div class="h-100 d-flex flex-column justify-content-center align-items-center">
                 <dotlottie-player src="https://lottie.host/a2ad8216-e6e7-43ab-834b-deb6eb734753/NxW5MqXOtg.json" background="transparent" speed="1" style="width: 300px; height: 300px;" loop autoplay></dotlottie-player>
                 <h4 class="text-secondary">لا توجد إشعارات حالياً</h4>
-            </div>
-        `;
+            </div>`;
+        } else {
+             content = `
+            <div class="h-100 d-flex flex-column justify-content-center align-items-center p-5">
+                <i class="fa-regular fa-bell-slash fa-4x text-muted mb-3"></i>
+                <h4 class="text-secondary">لا توجد إشعارات حالياً</h4>
+            </div>`;
+        }
+
+        notificationsList.innerHTML = content;
     }
 
     // عرض تنبيه

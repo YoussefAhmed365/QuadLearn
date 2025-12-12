@@ -1,4 +1,4 @@
-const { Server } = require('ws');
+const { Server, WebSocket } = require('ws');
 
 // إنشاء WebSocket Server
 const wss = new Server({ port: 5500 });
@@ -19,7 +19,7 @@ wss.on('connection', function connection(ws) {
 // دالة لإرسال الإشعارات لجميع العملاء المتصلين
 function broadcastNotification(notification) {
     wss.clients.forEach(client => {
-        if (client.readyState === client.OPEN) { // استخدام readyState مع client
+        if (client.readyState === WebSocket.OPEN) { // استخدام WebSocket.OPEN بدلاً من client.OPEN
             client.send(JSON.stringify(notification));
         }
     });
