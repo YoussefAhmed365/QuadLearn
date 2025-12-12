@@ -2,27 +2,31 @@
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
 
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-});
+if (dropZone) {
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
 
-dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('dragover');
-});
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
 
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    handleFiles(e.dataTransfer.files);
-});
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+}
 
-fileInput.addEventListener('change', (e) => {
-    handleFiles(e.target.files);
-});
+if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+}
 
 function triggerFileInput() {
-    fileInput.click();
+    if (fileInput) fileInput.click();
 }
 
 
@@ -93,7 +97,7 @@ async function uploadFile(file) { // Make uploadFile async
             progressBar.classList.remove('progress-bar-striped', 'progress-bar-animated');
             progressBar.classList.add('bg-success');
             progressBar.style.width = '100%';
-            setTimeout(() => toast.remove(), 2000); 
+            setTimeout(() => toast.remove(), 2000);
         } else {
             const fileResult = result.files.find(f => f.file === file.name);
             const errorMessage = fileResult && fileResult.message ? fileResult.message : `فشل رفع الملف: ${file.name}`;
@@ -124,18 +128,21 @@ async function fetchData(url, method = "POST", body = null) {
 }
 
 // التعامل مع البحث
-document.getElementById("searchFiles").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const searchInput = document.getElementById("searchInput").value.trim();
-    if (!searchInput) return;
+const searchFilesForm = document.getElementById("searchFiles");
+if (searchFilesForm) {
+    searchFilesForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const searchInput = document.getElementById("searchInput").value.trim();
+        if (!searchInput) return;
 
-    try {
-        const data = await fetchData("../../teacher/files/search-subject-files.php", "POST", { searchInput });
-        document.getElementById("filesContent").innerHTML = data;
-    } catch (error) {
-        console.error("Error during search:", error);
-    }
-});
+        try {
+            const data = await fetchData("../../teacher/files/search-subject-files.php", "POST", { searchInput });
+            document.getElementById("filesContent").innerHTML = data;
+        } catch (error) {
+            console.error("Error during search:", error);
+        }
+    });
+}
 
 // إدارة الملفات باستخدام IIFE
 const fileManager = (() => {
@@ -143,103 +150,24 @@ const fileManager = (() => {
     const showAllFilesButton = document.getElementById("showAllFiles");
     const radioBtns = document.getElementsByName("btnradio");
 
-    // إعداد استعلامات SQL بناءً على القيمة المحددة
-    const sqlQueries = {
-        showAll: {
-            teacherClause: `
-                (
-                    SELECT subject_files.*,  users.first_name,  users.last_name,  users.id AS teacher_id
-                    FROM assigned_assistants
-                    JOIN subject_files ON subject_files.teacher_id = assigned_assistants.assistant_id
-                    JOIN users ON users.id = assigned_assistants.assistant_id
-                    WHERE assigned_assistants.teacher_id = ?
-                )
-                UNION
-                (
-                    SELECT subject_files.*,  users.first_name,  users.last_name,  users.id AS teacher_id
-                    FROM subject_files
-                    JOIN users ON subject_files.teacher_id = users.id
-                    WHERE users.id = ?
-                )
-                ORDER BY created_at DESC;
-            `,
-            assistantClause: `
-                SELECT subject_files.id AS file_id, subject_files.unique_file AS unique_file, subject_files.file_name AS file_name, subject_files.created_at AS file_created_at, subject_files.updated_at AS file_updated_at, users.id AS teacher_id, users.first_name AS teacher_first_name, users.last_name AS teacher_last_name
-                FROM subject_files
-                JOIN users ON subject_files.teacher_id = users.id
-                WHERE subject_files.teacher_id = ?
-                   OR subject_files.teacher_id IN (
-                       SELECT teacher_id 
-                       FROM assigned_assistants 
-                       WHERE assistant_id = ?
-                   )
-                ORDER BY subject_files.created_at DESC;
-            `,
-            operands: 2,
-        },
-        ownFiles: {
-            teacherClause: `
-                SELECT subject_files.*, users.first_name, users.last_name, users.id AS teacher_id
-                FROM subject_files
-                JOIN users ON users.id = subject_files.teacher_id
-                WHERE subject_files.teacher_id = ?
-                ORDER BY created_at DESC;
-            `,
-            assistantClause: `
-                SELECT subject_files.*, users.first_name, users.last_name, users.id AS teacher_id
-                FROM subject_files
-                JOIN users ON users.id = subject_files.teacher_id
-                WHERE subject_files.teacher_id = ?
-                ORDER BY created_at DESC;
-            `,
-            operands: 1,
-        },
-        ascending: {
-            teacherClause: `
-                (
-                    SELECT subject_files.*,  users.first_name,  users.last_name,  users.id AS teacher_id
-                    FROM assigned_assistants
-                    JOIN subject_files ON subject_files.teacher_id = assigned_assistants.assistant_id
-                    JOIN users ON users.id = assigned_assistants.assistant_id
-                    WHERE assigned_assistants.teacher_id = ?
-                )
-                UNION
-                (
-                    SELECT subject_files.*,  users.first_name,  users.last_name,  users.id AS teacher_id
-                    FROM subject_files
-                    JOIN users ON subject_files.teacher_id = users.id
-                    WHERE users.id = ?
-                )
-                ORDER BY created_at ASC;
-            `,
-            assistantClause: `
-                SELECT subject_files.id AS file_id, subject_files.unique_file AS unique_file, subject_files.file_name AS file_name, subject_files.created_at AS file_created_at, subject_files.updated_at AS file_updated_at, users.id AS teacher_id, users.first_name AS teacher_first_name, users.last_name AS teacher_last_name
-                FROM subject_files
-                JOIN users ON subject_files.teacher_id = users.id
-                WHERE subject_files.teacher_id = ?
-                   OR subject_files.teacher_id IN (
-                       SELECT teacher_id 
-                       FROM assigned_assistants 
-                       WHERE assistant_id = ?
-                   )
-                ORDER BY subject_files.created_at ASC;
-                `,
-                operands: 2,
-            },
+    if (!filesTable) return { fetchFiles: () => {} };
+
+    // Instead of SQL clauses, we should send simple filter keys to the backend.
+    // The backend should handle the SQL construction to prevent SQL Injection risks.
+    const filterKeys = {
+        showAll: 'showAll',
+        ownFiles: 'ownFiles',
+        ascending: 'ascending'
     };
 
     // التعامل مع تغيير خيارات التصفية
     radioBtns.forEach((button) => {
         button.addEventListener("change", async () => {
-            const queryKey = button.value;
-            const query = sqlQueries[queryKey];
-            if (!query) {
-                console.error("Invalid filter selected.");
-                return;
-            }
+            const filterKey = button.value; // Expecting 'showAll', 'ownFiles', etc.
 
             try {
-                const data = await fetchData("../../teacher/files/show-all-files.php", "POST", query);
+                // Send the filter key instead of raw SQL
+                const data = await fetchData("../../teacher/files/show-all-files.php", "POST", { filter: filterKey });
                 filesTable.innerHTML = data;
             } catch (error) {
                 console.error("Error during filter fetch:", error);
@@ -255,28 +183,30 @@ const fileManager = (() => {
         } catch (error) {
             console.error("Error loading files:", error);
         }
-        
+
         updateCheckboxState();
     };
 
     // عرض جميع الملفات
-    showAllFilesButton.addEventListener("click", async () => {
-        showAllFilesButton.disabled = true;
-        showAllFilesButton.innerHTML = "<div class='btn-loader'></div>";
+    if (showAllFilesButton) {
+        showAllFilesButton.addEventListener("click", async () => {
+            showAllFilesButton.disabled = true;
+            showAllFilesButton.innerHTML = "<div class='btn-loader'></div>";
 
-        try {
-            const query = sqlQueries.showAll;
-            const data = await fetchData("../../teacher/files/show-all-files.php", "POST", query);
-            filesTable.innerHTML = data;
-        } catch (error) {
-            console.error("Error showing all files:", error);
-        } finally {
-            showAllFilesButton.disabled = false;
-            showAllFilesButton.style.display = "none";
-            updateCheckboxState();
-        }
-    });
-    
+            try {
+                // Send filter key 'showAll'
+                const data = await fetchData("../../teacher/files/show-all-files.php", "POST", { filter: 'showAll' });
+                filesTable.innerHTML = data;
+            } catch (error) {
+                console.error("Error showing all files:", error);
+            } finally {
+                showAllFilesButton.disabled = false;
+                showAllFilesButton.style.display = "none";
+                updateCheckboxState();
+            }
+        });
+    }
+
     // استدعاء الملفات عند التحميل الأول للصفحة
     fetchFiles();
 
@@ -287,14 +217,16 @@ const fileManager = (() => {
 const selectAllCheckbox = document.getElementById("selectAllCheckbox");
 const deleteSelectedFiles = document.getElementById("deleteAllFiles");
 
-selectAllCheckbox.addEventListener("change", function (event) {
-    const checkboxes = document.querySelectorAll("#filesContent input[type='checkbox']");
-    const isChecked = event.target.checked;
-    checkboxes.forEach((checkbox) => {
-        checkbox.checked = isChecked;
+if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener("change", function (event) {
+        const checkboxes = document.querySelectorAll("#filesContent input[type='checkbox']");
+        const isChecked = event.target.checked;
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = isChecked;
+        });
+        toggleDeleteBtn();
     });
-    toggleDeleteBtn();
-});
+}
 
 function updateCheckboxState() {
     const allCheckboxes = document.querySelectorAll("#filesContent input[type='checkbox']");
@@ -303,10 +235,12 @@ function updateCheckboxState() {
     allCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener("change", function () {
             const checkedCheckboxesLength = document.querySelectorAll("#filesContent input[type='checkbox']:checked").length;
-            if (checkedCheckboxesLength === allCheckboxesLength) {
-                selectAllCheckbox.checked = true;
-            } else {
-                selectAllCheckbox.checked = false;
+            if (selectAllCheckbox) {
+                if (checkedCheckboxesLength === allCheckboxesLength && allCheckboxesLength > 0) {
+                    selectAllCheckbox.checked = true;
+                } else {
+                    selectAllCheckbox.checked = false;
+                }
             }
             toggleDeleteBtn();
         });
@@ -315,34 +249,41 @@ function updateCheckboxState() {
 }
 
 function toggleDeleteBtn() {
-    if (document.querySelectorAll("#filesContent input[type='checkbox']:checked").length > 0) {
-        deleteSelectedFiles.style.visibility = "visible";
-    } else {
-        deleteSelectedFiles.style.visibility = "hidden";
+    if (deleteSelectedFiles) {
+        if (document.querySelectorAll("#filesContent input[type='checkbox']:checked").length > 0) {
+            deleteSelectedFiles.style.visibility = "visible";
+        } else {
+            deleteSelectedFiles.style.visibility = "hidden";
+        }
     }
 }
 
 // إدارة زر الحذف الجماعي
-document.getElementById("deleteAllFiles").addEventListener("click", async () => {
-    const checkboxes = document.querySelectorAll("#filesContent input[type='checkbox']:checked");
-    const selectedIds = Array.from(checkboxes).map((checkbox) =>
-        checkbox.id.replace("fileCheckbox", "")
-    );
+if (deleteSelectedFiles) {
+    deleteSelectedFiles.addEventListener("click", async () => {
+        const checkboxes = document.querySelectorAll("#filesContent input[type='checkbox']:checked");
+        const selectedIds = Array.from(checkboxes).map((checkbox) =>
+            checkbox.id.replace("fileCheckbox", "")
+        );
 
-    if (selectedIds.length === 0) {
-        alert("Please select files to delete.");
-        return;
-    }
+        if (selectedIds.length === 0) {
+            alert("Please select files to delete.");
+            return;
+        }
 
-    try {
-        const response = await fetchData("delete_files.php", "POST", { file_ids: selectedIds });
-        checkboxes.forEach((checkbox) => checkbox.closest("tr").remove());
-        alert("Files deleted successfully.");
-    } catch (error) {
-        console.error("Error deleting files:", error);
-        alert("An error occurred while deleting files.");
-    }
-});
+        try {
+            const response = await fetchData("delete_files.php", "POST", { file_ids: selectedIds });
+            // Assume response is success or handle it if it returns JSON
+            // fetchData returns text. We might want to parse it if PHP returns JSON.
+            // For now, assume success if no error thrown.
+            checkboxes.forEach((checkbox) => checkbox.closest("tr").remove());
+            alert("Files deleted successfully.");
+        } catch (error) {
+            console.error("Error deleting files:", error);
+            alert("An error occurred while deleting files.");
+        }
+    });
+}
 
 // دالة لتحديث التوست عند حدوث خطأ
 function showErrorToast(progressBar, toast, message) {
@@ -360,83 +301,90 @@ document.addEventListener("click", function (e) {
         const fileName = e.target.getAttribute("data-file-name") || "Unnamed File";
 
         // Populate the modal fields
-        document.getElementById("fileIdInput").value = fileId;
-        document.getElementById("fileNameInput").value = fileName;
+        const fileIdInput = document.getElementById("fileIdInput");
+        const fileNameInput = document.getElementById("fileNameInput");
+        if(fileIdInput) fileIdInput.value = fileId;
+        if(fileNameInput) fileNameInput.value = fileName;
     }
 });
 
 // Handle Edit Form Submission
 const editFileForm = document.getElementById("editFileForm");
-editFileForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
+if (editFileForm) {
+    editFileForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-    const fileId = document.getElementById("fileIdInput").value.trim();
-    const fileNameInput = document.getElementById("fileNameInput").value.trim();
+        const fileId = document.getElementById("fileIdInput").value.trim();
+        const fileNameInput = document.getElementById("fileNameInput").value.trim();
 
-    if (!fileNameInput) {
-        alert("اسم الملف لا يمكن أن يكون فارغًا.");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("file_id", fileId);
-    formData.append("fileNameInput", fileNameInput);
-
-    try {
-        const response = await fetch("edit_file.php", {
-            method: 'POST',
-            body: formData,
-        });
-        const result = await response.json();
-
-        if (result.status === "success") {
-            alert("تم تعديل اسم الملف بنجاح");
-            window.location.reload(); // Reload the page to update the file list
-        } else {
-            alert(result.message || "حدث خطأ أثناء تعديل اسم الملف");
+        if (!fileNameInput) {
+            alert("اسم الملف لا يمكن أن يكون فارغًا.");
+            return;
         }
-    } catch (error) {
-        console.error("Error editing file:", error);
-        alert("حدث خطأ أثناء تعديل اسم الملف");
-    }
-});
+
+        const formData = new FormData();
+        formData.append("file_id", fileId);
+        formData.append("fileNameInput", fileNameInput);
+
+        try {
+            const response = await fetch("edit_file.php", {
+                method: 'POST',
+                body: formData,
+            });
+            const result = await response.json();
+
+            if (result.status === "success") {
+                alert("تم تعديل اسم الملف بنجاح");
+                window.location.reload(); // Reload the page to update the file list
+            } else {
+                alert(result.message || "حدث خطأ أثناء تعديل اسم الملف");
+            }
+        } catch (error) {
+            console.error("Error editing file:", error);
+            alert("حدث خطأ أثناء تعديل اسم الملف");
+        }
+    });
+}
 
 // Handle Delete Modal
 document.addEventListener("click", function (e) {
     if (e.target.matches("[data-bs-target='#deleteModal']")) {
         const fileId = e.target.getAttribute("data-file-id");
-        
+
         // Display the file name in the delete confirmation modal
         const modalBody = document.querySelector("#deleteModal .modal-body");
-        modalBody.textContent = `هل أنت متأكد أنك تريد حذف الملف؟`;
+        if(modalBody) modalBody.textContent = `هل أنت متأكد أنك تريد حذف الملف؟`;
 
         // Set the file ID on the confirm delete button
         const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-        confirmDeleteBtn.setAttribute("data-file-id", fileId);
+        if(confirmDeleteBtn) confirmDeleteBtn.setAttribute("data-file-id", fileId);
     }
 });
 
 // Handle Confirm Delete Button
-document.getElementById("confirmDeleteBtn").addEventListener("click", async function () {
-    const fileId = this.getAttribute("data-file-id");
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener("click", async function () {
+        const fileId = this.getAttribute("data-file-id");
 
-    if (!fileId) {
-        alert("لم يتم تحديد ملف للحذف.");
-        return;
-    }
-
-    try {
-        const response = await fetch(`delete_file.php?file_id=${fileId}`, { method: 'GET' });
-        const result = await response.json();
-
-        if (result.success) {
-            alert("تم حذف الملف بنجاح");
-            window.location.reload(); // Reload the page to update the file list
-        } else {
-            alert(result.message || "حدث خطأ أثناء حذف الملف");
+        if (!fileId) {
+            alert("لم يتم تحديد ملف للحذف.");
+            return;
         }
-    } catch (error) {
-        console.error("Error deleting file:", error);
-        alert("حدث خطأ أثناء حذف الملف");
-    }
-});
+
+        try {
+            const response = await fetch(`delete_file.php?file_id=${fileId}`, { method: 'GET' });
+            const result = await response.json();
+
+            if (result.success) {
+                alert("تم حذف الملف بنجاح");
+                window.location.reload(); // Reload the page to update the file list
+            } else {
+                alert(result.message || "حدث خطأ أثناء حذف الملف");
+            }
+        } catch (error) {
+            console.error("Error deleting file:", error);
+            alert("حدث خطأ أثناء حذف الملف");
+        }
+    });
+}

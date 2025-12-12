@@ -1,5 +1,6 @@
 // إنشاء WebSocket للاتصال بالخادم
-const socket = new WebSocket('ws://127.0.0.1:5500');
+const wsUrl = `ws://${window.location.hostname}:5500`;
+const socket = new WebSocket(wsUrl);
 
 // عند فتح الاتصال بخادم WebSocket
 socket.onopen = function() {
@@ -24,13 +25,18 @@ socket.onmessage = function(event) {
     bodyElement.innerHTML = newNotificationHTML + bodyElement.innerHTML;
 
     // تحديث رمز الجرس إلى الحالة المفعلة
-    document.getElementById('bell').classList.add('fa-solid');
-    document.getElementById('bell').classList.remove('fa-regular');
+    const bell = document.getElementById('bell');
+    if (bell) {
+        bell.classList.add('fa-solid');
+        bell.classList.remove('fa-regular');
+    }
 
     // تحديث عدد الإشعارات غير المقروءة
     const unreadCountElement = document.getElementById('unreadCount');
-    unreadCountElement.textContent = parseInt(unreadCountElement.textContent) + 1;
-    unreadCountElement.style.display = 'block';
+    if (unreadCountElement) {
+        unreadCountElement.textContent = parseInt(unreadCountElement.textContent || '0') + 1;
+        unreadCountElement.style.display = 'block';
+    }
 };
 
 // معالجة الأخطاء التي تحدث في WebSocket
@@ -51,59 +57,77 @@ function fetchNotifications() {
             const bodyElement = document.querySelector('.body');
             bodyElement.innerHTML = ''; // تفريغ المحتوى الحالي
 
+            const bell = document.getElementById('bell');
+            const unreadCountElement = document.getElementById('unreadCount');
+
             // إذا كانت هناك إشعارات غير مقروءة، يتم عرضها
             if (data.total > 0) {
                 bodyElement.innerHTML = data.html;
                 bodyElement.style.maxHeight = '280px';
-                document.getElementById('bell').classList.add('fa-solid');
-                document.getElementById('bell').classList.remove('fa-regular');
+                if (bell) {
+                    bell.classList.add('fa-solid');
+                    bell.classList.remove('fa-regular');
+                }
             } else {
                 bodyElement.innerHTML = data.html;
                 bodyElement.style.maxHeight = 'unset';
-                document.getElementById('bell').classList.add('fa-regular');
-                document.getElementById('bell').classList.remove('fa-solid');
+                if (bell) {
+                    bell.classList.add('fa-regular');
+                    bell.classList.remove('fa-solid');
+                }
             }
-            
+
             // تحديث عدد الإشعارات غير المقروءة
-            const unreadCountElement = document.getElementById('unreadCount');
             if (data.total > 0) {
-                unreadCountElement.textContent = data.total;
-                unreadCountElement.style.display = 'block';
+                if (unreadCountElement) {
+                    unreadCountElement.textContent = data.total;
+                    unreadCountElement.style.display = 'block';
+                }
             } else {
-                unreadCountElement.style.display = 'none';
+                if (unreadCountElement) {
+                    unreadCountElement.style.display = 'none';
+                }
             }
         })
         .catch(error => console.error("Error fetching notifications:", error));
     }
-    
+
     // دالة لتحديث حالة الإشعارات إلى مقروءة
     function markNotificationsAsRead() {
         fetch('../../student/mark_as_read_student.php', { method: 'POST' })
         .then(() => {
-            document.getElementById('unreadCount').style.display = 'none';
-            document.getElementById('bell').classList.add('fa-regular');
-            document.getElementById('bell').classList.remove('fa-solid');
+            const unreadCountElement = document.getElementById('unreadCount');
+            const bell = document.getElementById('bell');
+
+            if (unreadCountElement) unreadCountElement.style.display = 'none';
+            if (bell) {
+                bell.classList.add('fa-regular');
+                bell.classList.remove('fa-solid');
+            }
         })
         .catch(error => console.error("Error marking notifications as read:", error));
 }
 
 // التعامل مع فتح/إغلاق لوحة الإشعارات
-document.getElementById('readState').addEventListener('click', function(e) {
-    e.stopPropagation();
-    const panelElement = document.querySelector('.panel');
-    if (panelElement.style.display === 'block') {
-        panelElement.style.display = 'none';
-        markNotificationsAsRead();
-    } else {
-        panelElement.style.display = 'block';
-        fetchNotifications();
-    }
-});
+const readStateBtn = document.getElementById('readState');
+if (readStateBtn) {
+    readStateBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const panelElement = document.querySelector('.panel');
+        if (panelElement.style.display === 'block') {
+            panelElement.style.display = 'none';
+            markNotificationsAsRead();
+        } else {
+            panelElement.style.display = 'block';
+            fetchNotifications();
+        }
+    });
+}
 
 // إغلاق اللوحة عند النقر خارجها
 document.addEventListener('click', function(e) {
     const panelElement = document.querySelector('.panel');
-    if (panelElement.style.display === 'block' && !e.target.closest('.panel') && !e.target.closest('#readState')) {
+    if (panelElement && panelElement.style.display === 'block' && !e.target.closest('.panel') && !e.target.closest('#readState')) {
         panelElement.style.display = 'none';
         markNotificationsAsRead();
     }
@@ -111,11 +135,17 @@ document.addEventListener('click', function(e) {
 
 // إخفاء اللوحة وشعار الإشعارات عند تحميل الصفحة
 window.onload = function() {
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("content").style.display = "block";
+    const loading = document.getElementById("loading");
+    if (loading) loading.style.display = "none";
 
-    document.querySelector('.panel').style.display = 'none';
-    document.getElementById('unreadCount').style.display = 'none';
+    const content = document.getElementById("content");
+    if (content) content.style.display = "block";
+
+    const panel = document.querySelector('.panel');
+    if (panel) panel.style.display = 'none';
+
+    const unreadCount = document.getElementById('unreadCount');
+    if (unreadCount) unreadCount.style.display = 'none';
 
     // جلب الإشعارات عند تحميل الصفحة
     fetchNotifications();

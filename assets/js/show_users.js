@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // disable buttons that rely on Bootstrap modals
         const uploadButton = document.getElementById("uploadButton");
         if (uploadButton) uploadButton.disabled = true;
-        return; // Stop script execution if Bootstrap is not available
+        // Don't return, let other functionalities (like search) work if possible
     }
 
     // --- References to common elements ---
@@ -19,43 +19,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Ensure modal elements exist before creating instances
     let uploadDegreeModal, uploadStatusModal, deleteConfirmationModal, deleteAllStudentsModal, addAssistantModal, degreesModal;
-    if (uploadDegreeModalElement) {
-        uploadDegreeModal = new bootstrap.Modal(uploadDegreeModalElement);
-    } else {
-        console.error("Upload Degree modal element not found!");
-        return; // Critical modal is missing
-    }
-    if (uploadStatusModalElement) {
-        uploadStatusModal = new bootstrap.Modal(uploadStatusModalElement);
-    } else {
-        console.error("Status modal element not found!");
-        return; // Critical modal is missing
-    }
-    if (deleteConfirmationModalElement) {
-        deleteConfirmationModal = new bootstrap.Modal(deleteConfirmationModalElement);
-    } else {
-        console.error("Delete confirmation modal element not found!");
-        return; // Critical modal is missing
-    }
-    if (deleteAllStudentsModalElement) {
-        deleteAllStudentsModal = new bootstrap.Modal(deleteAllStudentsModalElement);
-    } else {
-        console.error("Delete All Students modal element not found!");
-        return; // Critical modal is missing
-    }
-    if (addAssistantModalElement) {
-        addAssistantModal = new bootstrap.Modal(addAssistantModalElement);
-    } else {
-        console.error("Add Assistant modal element not found!");
-        return; // Critical modal is missing
-    }
-    if (degreesModalElement) {
-        degreesModal = new bootstrap.Modal(degreesModalElement);
-    } else {
-        console.error("Degrees modal modal element not found!");
-        return; // Critical modal is missing
-    }
 
+    // Helper to safely init modal
+    const initModal = (element) => {
+        if (element && typeof bootstrap !== 'undefined') {
+            return new bootstrap.Modal(element);
+        }
+        return null;
+    };
+
+    uploadDegreeModal = initModal(uploadDegreeModalElement);
+    uploadStatusModal = initModal(uploadStatusModalElement);
+    deleteConfirmationModal = initModal(deleteConfirmationModalElement);
+    deleteAllStudentsModal = initModal(deleteAllStudentsModalElement);
+    addAssistantModal = initModal(addAssistantModalElement);
+    degreesModal = initModal(degreesModalElement);
 
     // References for Upload Degree Modal
     const FileInput = document.getElementById("excelFile");
@@ -113,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 messageDiv.innerHTML = `<div class="alert alert-danger" role="alert">فشل تحديث الجدول (${tableId}): ${error.message}</div>`;
                 uploadStatusModal.show();
             } else {
-                alert(`فشل تحديث الجدول (${tableId}): ${error.message}`);
+                // alert(`فشل تحديث الجدول (${tableId}): ${error.message}`);
             }
         }
     }
@@ -285,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         itemElement.remove();
                     } else {
                         // Fallback: Reload the specific table's content if direct removal fails or is complex
-                        console.warn(`Could not find item with ID ${id} in ${tableToUpdate} for direct removal. Refreshing table.`);
+                        // console.warn(`Could not find item with ID ${id} in ${tableToUpdate} for direct removal. Refreshing table.`);
                         let currentSearchValue = '';
                         if (tableToUpdate === 'studentTable' && studentSearchInput) {
                             currentSearchValue = studentSearchInput.value;
@@ -321,37 +299,40 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Delete All Students Logic ---
     const confirmDeleteAllBtn = document.getElementById('confirmDeleteAllBtn');
 
-    confirmDeleteAllBtn.addEventListener('click', () => {
-        fetch('delete-all-students.php', {
-            method: 'POST',
-            headers: { "X-Requested-With": "XMLHttpRequest" },
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
+    if (confirmDeleteAllBtn) {
+        confirmDeleteAllBtn.addEventListener('click', () => {
+            fetch('delete-all-students.php', {
+                method: 'POST',
+                headers: { "X-Requested-With": "XMLHttpRequest" },
             })
-            .then(data => {
-                if (data.status === 'success') {
-                    messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-check text-success" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'تم حذف جميع الطلاب.'}</h6></div>`;
-                    updateTable('studentTable'); // Refresh the student table
-                } else {
-                    messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'حدث خطأ أثناء حذف جميع الطلاب.'}</h6></div>`;
-                }
-            })
-            .catch(error => {
-                console.error('Error deleting all students:', error);
-                messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${error.message || 'حدث خطأ غير متوقع أثناء حذف جميع الطلاب.'}</h6></div>`;
-            })
-            .finally(() => {
-                uploadStatusModal.show();
-                setTimeout(() => {
-                    if (uploadStatusModal) uploadStatusModal.hide();
-                    updateTable('studentTable'); // Refresh the student table
-                }, 3000);
-            });
-    });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-check text-success" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'تم حذف جميع الطلاب.'}</h6></div>`;
+                        updateTable('studentTable'); // Refresh the student table
+                    } else {
+                        messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'حدث خطأ أثناء حذف جميع الطلاب.'}</h6></div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting all students:', error);
+                    messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${error.message || 'حدث خطأ غير متوقع أثناء حذف جميع الطلاب.'}</h6></div>`;
+                })
+                .finally(() => {
+                    if (deleteAllStudentsModal) deleteAllStudentsModal.hide();
+                    if (uploadStatusModal) uploadStatusModal.show();
+                    setTimeout(() => {
+                        if (uploadStatusModal) uploadStatusModal.hide();
+                        updateTable('studentTable'); // Refresh the student table
+                    }, 3000);
+                });
+        });
+    }
 
     // --- Event Delegation for Delete Buttons in Tables ---
     // This is more robust for dynamically updated tables.
@@ -383,73 +364,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Add Assistant Modal ---
     const addAssistantForm = document.getElementById('addAssistantForm');
-    addAssistantForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    if (addAssistantForm) {
+        addAssistantForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-        const formData = new FormData(addAssistantForm);
+            const formData = new FormData(addAssistantForm);
 
-        messageDiv.innerHTML = '<div class="d-flex align-items-center justify-content-center p-3 mx-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mb-0 ms-2">جاري إضافة المساعد...</p></div>';
-        addAssistantModal.hide();
-        uploadStatusModal.show(); // Show the modal to display the loading message
-
-        try {
-            const response = await fetch('add-assistant.php', {
-                method: 'POST',
-                body: formData,
-                headers: { "X-Requested-With": "XMLHttpRequest" },
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || `HTTP error! Status: ${response.status}`);
-            }
-
-            let iconClass = 'fa-regular fa-circle-check text-success';
-            if (data.status === "warning") iconClass = 'fa-solid fa-circle-exclamation text-warning';
-            else if (data.status !== "success") iconClass = 'fa-regular fa-circle-xmark text-danger';
-
-            messageDiv.innerHTML = `<div class="text-center p-4"><i class="${iconClass}" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'حدث خطأ غير معروف.'}</h6></div>`;
-
-            if (data.status === 'success') {
-                addAssistantForm.reset(); // Clear the form
-                messageDiv.innerHTML = `<div class="text-center p-4"><i class="${iconClass}" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message}</h6></div>`;
-                addAssistantModal.hide();
-                uploadStatusModal.show();
-                setTimeout(() => {
-                    updateTable('assistantContainer'); // Refresh the assistant table
-                    addAssistantModal.show();
-                    uploadStatusModal.hide(); // Hide the modal after a delay
-                }, 2000);
-            } else if (data.status === 'warning') {
-                messageDiv.innerHTML = `<div class="text-center p-4"><i class="${iconClass}" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message}</h6></div>`;
-                addAssistantModal.hide();
-                uploadStatusModal.show();
-                setTimeout(() => {
-                    addAssistantModal.show();
-                    uploadStatusModal.hide();
-                }, 5000); // Keep modal longer for warnings
-            } else {
-                messageDiv.innerHTML = `<div class="text-center p-4"><i class="${iconClass}" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message}</h6></div>`;
-                addAssistantModal.hide();
-                uploadStatusModal.show();
-                setTimeout(() => {
-                    addAssistantModal.show();
-                    uploadStatusModal.hide();
-                }, 5000); // Keep modal longer for warnings
-            }
-
-        } catch (error) {
-            console.error('Error adding assistant:', error);
-            messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${error.message || 'حدث خطأ غير متوقع أثناء إضافة المساعد.'}</h6></div>`;
-            setTimeout(() => {
-                addAssistantModal.show();
-                uploadStatusModal.hide();
-            }, 5000); // Keep modal longer for warnings
+            messageDiv.innerHTML = '<div class="d-flex align-items-center justify-content-center p-3 mx-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mb-0 ms-2">جاري إضافة المساعد...</p></div>';
             addAssistantModal.hide();
-            uploadStatusModal.show();
-        }
-    });
+            uploadStatusModal.show(); // Show the modal to display the loading message
+
+            try {
+                const response = await fetch('add-assistant.php', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || `HTTP error! Status: ${response.status}`);
+                }
+
+                let iconClass = 'fa-regular fa-circle-check text-success';
+                if (data.status === "warning") iconClass = 'fa-solid fa-circle-exclamation text-warning';
+                else if (data.status !== "success") iconClass = 'fa-regular fa-circle-xmark text-danger';
+
+                messageDiv.innerHTML = `<div class="text-center p-4"><i class="${iconClass}" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message || 'حدث خطأ غير معروف.'}</h6></div>`;
+
+                if (data.status === 'success') {
+                    addAssistantForm.reset(); // Clear the form
+                    messageDiv.innerHTML = `<div class="text-center p-4"><i class="${iconClass}" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message}</h6></div>`;
+                    if(addAssistantModal) addAssistantModal.hide();
+                    uploadStatusModal.show();
+                    setTimeout(() => {
+                        updateTable('assistantContainer'); // Refresh the assistant table
+                        if(addAssistantModal) addAssistantModal.show();
+                        uploadStatusModal.hide(); // Hide the modal after a delay
+                    }, 2000);
+                } else {
+                    messageDiv.innerHTML = `<div class="text-center p-4"><i class="${iconClass}" style="font-size: 5rem;"></i><h6 class="mt-3">${data.message}</h6></div>`;
+                    if(addAssistantModal) addAssistantModal.hide();
+                    uploadStatusModal.show();
+                    setTimeout(() => {
+                        if(addAssistantModal) addAssistantModal.show();
+                        uploadStatusModal.hide();
+                    }, 5000);
+                }
+
+            } catch (error) {
+                console.error('Error adding assistant:', error);
+                messageDiv.innerHTML = `<div class="text-center p-4"><i class="fa-regular fa-circle-xmark text-danger" style="font-size: 5rem;"></i><h6 class="mt-3">${error.message || 'حدث خطأ غير متوقع أثناء إضافة المساعد.'}</h6></div>`;
+                setTimeout(() => {
+                    if(addAssistantModal) addAssistantModal.show();
+                    uploadStatusModal.hide();
+                }, 5000);
+                if(addAssistantModal) addAssistantModal.hide();
+                uploadStatusModal.show();
+            }
+        });
+    }
     // --- Initial Load for tables if needed ---
     // Example: updateTable('studentTable', studentSearchInput ? studentSearchInput.value : '');
     // updateTable('assistantContainer'); // Load assistants initially
